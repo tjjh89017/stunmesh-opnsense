@@ -12,9 +12,21 @@ rcvar="stunmesh_enable"
 load_rc_config "${name}"
 
 : ${stunmesh_enable:="NO"}
+: ${stunmesh_config:="/usr/local/etc/stunmesh/config.yaml"}
+: ${stunmesh_flags:=""}
 
+# pidfile holds the daemon(8) supervisor pid, so `service stunmesh status`
+# stays stable while daemon(8) restarts the child on exit (-R 5).
 pidfile="/var/run/${name}.pid"
+stunmesh_child_pidfile="/var/run/${name}_child.pid"
 command="/usr/sbin/daemon"
-command_args="-S -T stunmesh -f -p ${pidfile} -R 5 /usr/local/bin/stunmesh-go -c /usr/local/etc/stunmesh/config.yaml"
+command_args="-S -T stunmesh -f -P ${pidfile} -p ${stunmesh_child_pidfile} -R 5 /usr/local/bin/stunmesh-go -c ${stunmesh_config} ${stunmesh_flags}"
+
+stop_postcmd="stunmesh_stop_postcmd"
+
+stunmesh_stop_postcmd()
+{
+	rm -f "${stunmesh_child_pidfile}"
+}
 
 run_rc_command "$1"
