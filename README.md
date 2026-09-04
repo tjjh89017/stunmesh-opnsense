@@ -60,6 +60,12 @@ stunmesh-go YAML config, and Apply. The config is written to
 **Status > Services** once enabled. stunmesh-go logs via `daemon -S` to
 syslog, visible under **System > Log Files > General**.
 
+stunmesh-go looks up `wg` on `$PATH` to manage WireGuard peers.
+OPNsense ships `wg` at `/usr/bin/wg` as part of its FreeBSD base image
+(WireGuard is core, not a plugin), so this package declares no
+`PLUGIN_DEPENDS` for it -- there is no separate `wireguard-tools` pkg
+in OPNsense's own repository to depend on.
+
 ## How the build works
 
 CI does the equivalent of, for each ABI:

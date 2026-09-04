@@ -36,10 +36,11 @@ PKG_FILE=$(find "$PKG_DIR" -maxdepth 1 -name '*.pkg' | head -n1)
 [ -n "$PKG_FILE" ] || { echo "error: no .pkg found under $PKG_DIR" >&2; exit 1; }
 
 echo "::group::Install $PKG_FILE"
-# No PLUGIN_DEPENDS (see Makefile): "wg" ships in OPNsense's base image,
-# confirmed below, so a plain "pkg add" (no dependency resolution) is
-# enough.
-command -v wg >/dev/null 2>&1 || { echo "error: 'wg' not found in base image" >&2; exit 1; }
+# No PLUGIN_DEPENDS (see Makefile): "wg" ships at /usr/bin/wg in
+# OPNsense's FreeBSD base, not as a separate pkg -- confirmed below --
+# so a plain "pkg add" (no dependency resolution) is enough.
+test -x /usr/bin/wg || { echo "error: /usr/bin/wg missing or not executable" >&2; exit 1; }
+command -v wg >/dev/null 2>&1 || { echo "error: 'wg' not found on PATH" >&2; exit 1; }
 pkg add "$PKG_FILE"
 pkg info os-stunmesh
 echo "::endgroup::"
