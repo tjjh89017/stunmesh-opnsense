@@ -47,7 +47,10 @@ sys.path.insert(0, '/usr/local/opnsense/service')
 
 from modules import config, template  # noqa: E402
 
-MODULE_NAME = 'OPNsense.Stunmesh'
+# Template module names use the same "/" path separator as the template
+# directory tree and +TARGETS (e.g. "configctl template reload OPNsense/Stunmesh"),
+# not the dot notation used in this module's own docstrings.
+MODULE_NAME = 'OPNsense/Stunmesh'
 CONFIG_XML = '/conf/config.xml'
 
 
