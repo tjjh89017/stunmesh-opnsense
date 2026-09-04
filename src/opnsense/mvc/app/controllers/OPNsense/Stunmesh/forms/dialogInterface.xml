@@ -26,6 +26,7 @@
     <field>
         <type>header</type>
         <label>Proxy (FreeBSD)</label>
+        <advanced>true</advanced>
     </field>
     <field>
         <id>interface.proxy_enabled</id>
@@ -51,6 +52,7 @@
     <field>
         <type>header</type>
         <label>STUN Listen (FreeBSD)</label>
+        <advanced>true</advanced>
     </field>
     <field>
         <id>interface.listen_interfaces</id>

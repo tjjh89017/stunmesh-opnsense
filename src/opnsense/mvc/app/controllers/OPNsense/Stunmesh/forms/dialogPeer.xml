@@ -38,17 +38,20 @@
     <field>
         <type>header</type>
         <label>Ping Monitor</label>
+        <advanced>true</advanced>
     </field>
     <field>
         <id>peer.ping_enabled</id>
         <label>Enable ping monitor</label>
         <type>checkbox</type>
+        <advanced>true</advanced>
         <help>Actively probe this peer to detect and recover from stale endpoints.</help>
     </field>
     <field>
         <id>peer.ping_target</id>
         <label>Ping target</label>
         <type>text</type>
+        <advanced>true</advanced>
         <help>Address to ping, typically the peer's tunnel address.</help>
     </field>
     <field>

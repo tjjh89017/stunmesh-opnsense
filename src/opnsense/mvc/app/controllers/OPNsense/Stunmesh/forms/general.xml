@@ -21,6 +21,17 @@
             again.</help>
     </field>
     <field>
+        <id>stunmesh.general.config</id>
+        <label>Custom YAML configuration</label>
+        <type>textbox</type>
+        <height>20</height>
+        <help>Used only in Custom YAML mode. Use "Show current config" and "Copy
+            to editor" to start from the generated file, then add options the web
+            UI does not expose (proxy, listen_interfaces, ping_monitor,
+            exec/shell plugin args, ...). See https://docs.stunmesh.dev for every
+            key.</help>
+    </field>
+    <field>
         <type>header</type>
         <label>Generated Options</label>
     </field>
@@ -64,20 +75,5 @@
         <type>text</type>
         <advanced>true</advanced>
         <help>Optional global default number of fixed ping retries. Used in generated mode.</help>
-    </field>
-    <field>
-        <type>header</type>
-        <label>Custom YAML</label>
-    </field>
-    <field>
-        <id>stunmesh.general.config</id>
-        <label>Configuration</label>
-        <type>textbox</type>
-        <height>20</height>
-        <help>Used only in Custom YAML mode. Use "Show current config" and "Copy
-            to editor" to start from the generated file, then add options the web
-            UI does not expose (proxy, listen_interfaces, ping_monitor,
-            exec/shell plugin args, ...). See https://docs.stunmesh.dev for every
-            key.</help>
     </field>
 </form>

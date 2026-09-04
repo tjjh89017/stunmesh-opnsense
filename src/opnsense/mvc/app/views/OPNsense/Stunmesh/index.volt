@@ -89,6 +89,8 @@
 
     $(document).ready(function() {
         mapDataToFormUI({'frm_GeneralSettings': "/api/stunmesh/settings/get"}).done(function() {
+            formatTokenizersUI();
+            $('.selectpicker').selectpicker('refresh');
             updateServiceControlUI('stunmesh');
             toggleGeneralMode();
         });
