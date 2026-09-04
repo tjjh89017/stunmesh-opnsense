@@ -404,7 +404,7 @@ fi
 echo ">>> $CONFIG_YAML contents:"
 cat "$CONFIG_YAML"
 
-grep -q 'wg0:' "$CONFIG_YAML" || { echo "error: config.yaml missing 'wg0:' interface section" >&2; exit 1; }
+grep -q '"wg0":' "$CONFIG_YAML" || { echo "error: config.yaml missing \"wg0\": interface section" >&2; exit 1; }
 grep -qF "$CLIENT_PUBKEY" "$CONFIG_YAML" || { echo "error: config.yaml missing the peer public key" >&2; exit 1; }
 grep -q 'plugin: "dht1"' "$CONFIG_YAML" || { echo "error: config.yaml missing the peer's plugin reference" >&2; exit 1; }
 grep -q 'type: "builtin"' "$CONFIG_YAML" || { echo "error: config.yaml missing the builtin plugin type" >&2; exit 1; }
