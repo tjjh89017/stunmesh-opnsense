@@ -364,8 +364,18 @@ rm -f "$VALIDATE_PHP"
 echo "::endgroup::"
 
 echo "::group::Render config.yaml template in generated mode"
-configctl template reload OPNsense/Stunmesh
-echo ">>> configctl template reload OPNsense/Stunmesh exit 0"
+set +e
+RELOAD_OUTPUT=$(configctl template reload OPNsense/Stunmesh 2>&1)
+RELOAD_STATUS=$?
+set -e
+echo "$RELOAD_OUTPUT"
+echo ">>> configctl template reload OPNsense/Stunmesh exit $RELOAD_STATUS"
+
+if [ "$RELOAD_STATUS" -ne 0 ] || printf '%s' "$RELOAD_OUTPUT" | grep -qi '^ERR'; then
+	echo ">>> template reload reported an error, dumping configd log for diagnosis"
+	tail -n 200 /var/log/configd.log 2>/dev/null || echo ">>> /var/log/configd.log not readable"
+	exit 1
+fi
 
 [ -f "$CONFIG_YAML" ] || { echo "error: $CONFIG_YAML was not generated" >&2; exit 1; }
 echo ">>> $CONFIG_YAML contents:"
