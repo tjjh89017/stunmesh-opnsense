@@ -9,13 +9,10 @@
 #                 <packages-dir>/FreeBSD:15:amd64/os-stunmesh-*.pkg),
 #                 rsync'd into the VM alongside this script.
 #
-# Beyond a plain install smoke test, this also exercises generated-mode
-# config rendering end to end: it inserts a WireGuard server/client and a
-# matching stunmesh config into a throwaway copy of /conf/config.xml,
-# validates the Stunmesh model through PHP the way OPNsense itself would
-# (exercising the ModelRelationFields, including the self-reference from
-# peers.peer.plugin to plugins.plugin), renders config.yaml via configd,
-# and runs stunmesh-go -oneshot against it.
+# Also exercises generated-mode end to end: inserts a WireGuard
+# server/client and a matching stunmesh config into a throwaway copy of
+# /conf/config.xml, validates the model via PHP, renders config.yaml via
+# configd, and runs stunmesh-go -oneshot against it.
 
 set -eu
 
@@ -39,9 +36,8 @@ PKG_FILE=$(find "$PKG_DIR" -maxdepth 1 -name '*.pkg' | head -n1)
 [ -n "$PKG_FILE" ] || { echo "error: no .pkg found under $PKG_DIR" >&2; exit 1; }
 
 echo "::group::Install $PKG_FILE"
-# No PLUGIN_DEPENDS (see Makefile): "wg" ships at /usr/bin/wg in
-# OPNsense's FreeBSD base, not as a separate pkg -- confirmed below --
-# so a plain "pkg add" (no dependency resolution) is enough.
+# "wg" ships in OPNsense's FreeBSD base, not as a separate pkg, so a
+# plain "pkg add" (no dependency resolution) is enough.
 test -x /usr/bin/wg || { echo "error: /usr/bin/wg missing or not executable" >&2; exit 1; }
 command -v wg >/dev/null 2>&1 || { echo "error: 'wg' not found on PATH" >&2; exit 1; }
 pkg add "$PKG_FILE"
@@ -70,10 +66,8 @@ grep -q 'page-vpn-stunmesh' /usr/local/opnsense/mvc/app/models/OPNsense/Stunmesh
 echo ">>> menu/ACL entries present"
 echo "::endgroup::"
 
-# From here on: checks that depend on configd/rc being fully up inside a
-# freshly booted CI VM. Reported, but not fatal to the job -- a flaky
-# configd handshake here should not block a signed feed publish when the
-# package itself installed and lints cleanly above.
+# Reported but not fatal: a flaky configd handshake on a freshly booted
+# VM should not block a signed feed publish.
 echo "::group::Service checks (best effort)"
 service stunmesh onestatus || echo ">>> service stunmesh onestatus: non-zero (service not started, expected by default)"
 
@@ -94,14 +88,8 @@ else
 fi
 echo "::endgroup::"
 
-# ---------------------------------------------------------------------
-# Generated-mode end-to-end check.
-#
-# Everything below edits a throwaway copy of the live /conf/config.xml.
-# The backup is restored unconditionally on exit (success, failure, or
-# an early "exit" from set -e), via the trap below.
-# ---------------------------------------------------------------------
-
+# Everything below edits a throwaway copy of the live /conf/config.xml,
+# restored unconditionally on exit via the trap below.
 CONFIG_XML=/conf/config.xml
 CONFIG_BACKUP=/conf/config.xml.test-package.bak
 CONFIG_YAML=/usr/local/etc/stunmesh/config.yaml
@@ -120,16 +108,12 @@ CLIENT_PUBKEY=$(printf '%s' "$CLIENT_PRIVKEY" | wg pubkey)
 
 UUID_FILE=$(mktemp)
 python3 - "$CONFIG_XML" "$SERVER_PUBKEY" "$SERVER_PRIVKEY" "$CLIENT_PUBKEY" "$UUID_FILE" <<'PYEOF'
-# Builds test rows from the *installed* core Wireguard model (Server.xml,
-# Client.xml) and this plugin's own Stunmesh.xml, rather than hardcoding
-# element names: each model's <mount> gives the config.xml path, and its
-# field definitions say which fields are Required (and their <Default>).
-# Rows only get their Required fields plus the handful of fields the test
-# explicitly overrides (name, keys, uuids, ...); every other optional
-# field is left out entirely, the way a row a user never fully filled in
-# looks in a real config.xml. This is deliberate: it is what proves the
-# Jinja config.yaml template guards every optional field access instead
-# of assuming it is always present.
+# Builds test rows from the installed core Wireguard model (Server.xml,
+# Client.xml) and this plugin's own Stunmesh.xml: each model's <mount>
+# gives the config.xml path, and its field definitions say which fields
+# are Required. Rows get only their Required fields plus the handful of
+# fields explicitly overridden below; every other optional field is left
+# out, to prove the Jinja template guards fields that are absent.
 import sys
 import uuid
 import xml.etree.ElementTree as ET
@@ -151,13 +135,10 @@ def load_model(path):
 
 
 def is_row_definition(el):
-    """True if el defines an array row: it carries a 'type' attribute
-    (ArrayField in this plugin's own model, but core OPNsense models such
-    as Wireguard's use a custom class reference like ".\\ServerField")
-    and its own children are themselves field definitions (each has a
-    'type' attribute), as opposed to a leaf field such as a
-    ModelRelationField, whose children are structural (Model,
-    ValidationMessage, ...) and carry no 'type' attribute."""
+    """True if el defines an array row: a 'type' attribute (ArrayField
+    here, but core models use a class reference like ".\\ServerField")
+    whose own children are field definitions, unlike a leaf field such as
+    a ModelRelationField whose children carry no 'type' attribute."""
     if el.get('type') is None:
         return False
     children = list(el)
@@ -166,11 +147,9 @@ def is_row_definition(el):
 
 def find_array_field(items, tag_name):
     """Depth-first search for the array-row definition named tag_name
-    anywhere under <items> (see is_row_definition). Matching stops at the
-    first (shallowest) hit, so an array field is found before any
-    same-named leaf field nested inside one of its own rows (e.g.
-    peers.peer.plugin, a ModelRelationField named like the top-level
-    plugins.plugin array it points to). Returns (dotted_path_list, element)."""
+    under <items>. Stops at the shallowest hit, so an array field is
+    found before a same-named leaf field nested inside one of its own
+    rows (e.g. peers.peer.plugin). Returns (dotted_path_list, element)."""
     def walk(node, path):
         for child in node:
             new_path = path + [child.tag]
@@ -198,19 +177,13 @@ def find_section(items, dotted):
 
 def required_field_defaults(node):
     """Default values for only the fields the model marks <Required>Y</Required>.
-    Every other optional field is left out of the row entirely (not even
-    written as an empty element), matching what a real config.xml looks
-    like for a row where those optional fields were never set -- OPNsense
-    drops empty/absent fields from helpers.toList() output, so this is
-    also what proves the Jinja template guards every optional field
-    access (a field silently defaulted to '' here would hide that bug)."""
+    OPNsense drops empty/absent fields from helpers.toList() output, so
+    leaving optional fields out entirely matches a real config.xml."""
     fields = {}
     for child in node:
         if is_row_definition(child):
             continue
         if child.get('volatile') == 'true':
-            # Runtime-only fields (e.g. cnfFilename, interface): not part
-            # of the persisted config.xml shape.
             continue
         req = child.find('Required')
         if req is None or (req.text or '').strip().upper() != 'Y':
@@ -302,12 +275,7 @@ make_row(plugin_container, plugin_path[-1], plugin_fields, {
     'name': 'dht1',
     'type': 'builtin',
     'builtin': 'opendht',
-    # opendht needs at least one endpoint to actually start (checked
-    # below by running stunmesh-go -oneshot against the rendered
-    # config), even though the OPNsense model itself does not mark this
-    # field Required. Every other optional plugin field (cf_*, command,
-    # dedup, description) is deliberately left out to prove the Jinja
-    # template guards them.
+    # Not model-Required, but opendht needs at least one endpoint to start.
     'endpoints': 'https://dhtproxy2.jami.net:443,https://dhtproxy3.jami.net:443',
 }, plugin_uuid)
 
@@ -353,9 +321,8 @@ echo "::group::Validate Stunmesh model via PHP (ModelRelationFields, including t
 RUN_MIGRATIONS=/usr/local/opnsense/mvc/script/run_migrations.php
 [ -f "$RUN_MIGRATIONS" ] || { echo "error: $RUN_MIGRATIONS not found, cannot bootstrap PHP MVC" >&2; exit 1; }
 
-# Reuse run_migrations.php's own bootstrap (require/include lines) instead
-# of guessing the include path, so this exercises the model exactly the
-# way OPNsense's own tooling does.
+# Reuse run_migrations.php's own bootstrap (require/include lines) rather
+# than guessing the include path.
 BOOTSTRAP_LINES=$(grep -E '^(require|require_once|include|include_once)' "$RUN_MIGRATIONS")
 [ -n "$BOOTSTRAP_LINES" ] || { echo "error: could not extract bootstrap include lines from $RUN_MIGRATIONS" >&2; exit 1; }
 
