@@ -8,17 +8,17 @@ log:
   level: "{{ OPNsense.stunmesh.general.log_level|default('info') }}"
   format: "{{ OPNsense.stunmesh.general.log_format|default('console') }}"
 stun:
-  addresses: [{% for addr in OPNsense.stunmesh.general.stun_addresses.split(',') %}{% if addr|trim != '' %}"{{ addr|trim|replace('"', '\\"') }}"{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}]
+  addresses: [{% for addr in (OPNsense.stunmesh.general.stun_addresses|default('')).split(',') %}{% if addr|trim != '' %}"{{ addr|trim|replace('"', '\\"') }}"{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}]
 {% if OPNsense.stunmesh.general.ping_interval|default('') != '' or OPNsense.stunmesh.general.ping_timeout|default('') != '' or OPNsense.stunmesh.general.ping_retries|default('') != '' %}
 ping_monitor:
 {% if OPNsense.stunmesh.general.ping_interval|default('') != '' %}
-  interval: "{{ OPNsense.stunmesh.general.ping_interval }}"
+  interval: "{{ OPNsense.stunmesh.general.ping_interval|default('') }}"
 {% endif %}
 {% if OPNsense.stunmesh.general.ping_timeout|default('') != '' %}
-  timeout: "{{ OPNsense.stunmesh.general.ping_timeout }}"
+  timeout: "{{ OPNsense.stunmesh.general.ping_timeout|default('') }}"
 {% endif %}
 {% if OPNsense.stunmesh.general.ping_retries|default('') != '' %}
-  fixed_retries: {{ OPNsense.stunmesh.general.ping_retries }}
+  fixed_retries: {{ OPNsense.stunmesh.general.ping_retries|default('0') }}
 {% endif %}
 {% endif %}
 plugins:
@@ -28,9 +28,9 @@ plugins:
   "{{ plug.name|replace('"', '\\"') }}":
     type: "{{ plug.type }}"
 {% if plug.type == 'builtin' %}
-    name: "{{ plug.builtin }}"
+    name: "{{ plug.builtin|default('') }}"
 {% if plug.builtin == 'opendht' %}
-    endpoints: [{% for ep in plug.endpoints.split(',') %}{% if ep|trim != '' %}"{{ ep|trim|replace('"', '\\"') }}"{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}]
+    endpoints: [{% for ep in (plug.endpoints|default('')).split(',') %}{% if ep|trim != '' %}"{{ ep|trim|replace('"', '\\"') }}"{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}]
 {% elif plug.builtin == 'cloudflare' %}
     zone: "{{ plug.cf_zone|default('')|replace('"', '\\"') }}"
     token: "{{ plug.cf_token|default('')|replace('"', '\\"') }}"
@@ -57,14 +57,14 @@ interfaces:
     proxy:
       enabled: {{ 'true' if iface.proxy_enabled == '1' else 'false' }}
 {% if iface.proxy_listen|default('') != '' %}
-      listen: {{ iface.proxy_listen }}
+      listen: {{ iface.proxy_listen|default('') }}
 {% endif %}
 {% if iface.proxy_fib|default('') != '' %}
-      fib: {{ iface.proxy_fib }}
+      fib: {{ iface.proxy_fib|default('') }}
 {% endif %}
 {% endif %}
 {% if iface.listen_interfaces|default('') != '' %}
-    listen_interfaces: [{% for li in iface.listen_interfaces.split(',') %}{% if li|trim != '' %}"{{ li|trim|replace('"', '\\"') }}"{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}]
+    listen_interfaces: [{% for li in (iface.listen_interfaces|default('')).split(',') %}{% if li|trim != '' %}"{{ li|trim|replace('"', '\\"') }}"{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}]
 {% endif %}
     listen_default_route: {{ 'true' if iface.listen_default_route == '1' else 'false' }}
     peers:
@@ -76,7 +76,7 @@ interfaces:
 {% if wg_peer != {} and wg_peer.enabled == '1' and plug_row != {} and plug_row.enabled == '1' %}
       "{{ wg_peer.name|replace('"', '\\"') }}":
 {% if peer.description|default('') != '' %}
-        description: "{{ peer.description|replace('"', '\\"') }}"
+        description: "{{ peer.description|default('')|replace('"', '\\"') }}"
 {% endif %}
         public_key: "{{ wg_peer.pubkey }}"
         plugin: "{{ plug_row.name|replace('"', '\\"') }}"
@@ -85,13 +85,13 @@ interfaces:
         ping:
           enabled: true
 {% if peer.ping_target|default('') != '' %}
-          target: "{{ peer.ping_target|replace('"', '\\"') }}"
+          target: "{{ peer.ping_target|default('')|replace('"', '\\"') }}"
 {% endif %}
 {% if peer.ping_interval|default('') != '' %}
-          interval: "{{ peer.ping_interval }}"
+          interval: "{{ peer.ping_interval|default('') }}"
 {% endif %}
 {% if peer.ping_timeout|default('') != '' %}
-          timeout: "{{ peer.ping_timeout }}"
+          timeout: "{{ peer.ping_timeout|default('') }}"
 {% endif %}
 {% endif %}
 {% endif %}

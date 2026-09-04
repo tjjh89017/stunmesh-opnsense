@@ -123,10 +123,13 @@ python3 - "$CONFIG_XML" "$SERVER_PUBKEY" "$SERVER_PRIVKEY" "$CLIENT_PUBKEY" "$UU
 # Builds test rows from the *installed* core Wireguard model (Server.xml,
 # Client.xml) and this plugin's own Stunmesh.xml, rather than hardcoding
 # element names: each model's <mount> gives the config.xml path, and its
-# field definitions (with <Default> values) give the row shape. Only the
-# handful of fields the test cares about are overridden; everything else
-# keeps the model's own default, which is enough to satisfy Required
-# fields without guessing every element name.
+# field definitions say which fields are Required (and their <Default>).
+# Rows only get their Required fields plus the handful of fields the test
+# explicitly overrides (name, keys, uuids, ...); every other optional
+# field is left out entirely, the way a row a user never fully filled in
+# looks in a real config.xml. This is deliberate: it is what proves the
+# Jinja config.yaml template guards every optional field access instead
+# of assuming it is always present.
 import sys
 import uuid
 import xml.etree.ElementTree as ET
@@ -193,7 +196,14 @@ def find_section(items, dotted):
     return node
 
 
-def field_defaults(node):
+def required_field_defaults(node):
+    """Default values for only the fields the model marks <Required>Y</Required>.
+    Every other optional field is left out of the row entirely (not even
+    written as an empty element), matching what a real config.xml looks
+    like for a row where those optional fields were never set -- OPNsense
+    drops empty/absent fields from helpers.toList() output, so this is
+    also what proves the Jinja template guards every optional field
+    access (a field silently defaulted to '' here would hide that bug)."""
     fields = {}
     for child in node:
         if is_row_definition(child):
@@ -201,6 +211,9 @@ def field_defaults(node):
         if child.get('volatile') == 'true':
             # Runtime-only fields (e.g. cnfFilename, interface): not part
             # of the persisted config.xml shape.
+            continue
+        req = child.find('Required')
+        if req is None or (req.text or '').strip().upper() != 'Y':
             continue
         d = child.find('Default')
         fields[child.tag] = d.text if d is not None and d.text is not None else ''
@@ -243,7 +256,7 @@ peer_row_uuid = str(uuid.uuid4())
 # --- WireGuard server (wg0) ---
 wg_server_mount, wg_server_items = load_model(WG_SERVER_MODEL)
 server_path, server_def = find_array_field(wg_server_items, 'server')
-server_fields = field_defaults(server_def)
+server_fields = required_field_defaults(server_def)
 server_container = get_or_create_path(config_root, wg_server_mount + server_path[:-1])
 make_row(server_container, server_path[-1], server_fields, {
     'enabled': '1',
@@ -258,7 +271,7 @@ make_row(server_container, server_path[-1], server_fields, {
 # --- WireGuard client (peer1) ---
 wg_client_mount, wg_client_items = load_model(WG_CLIENT_MODEL)
 client_path, client_def = find_array_field(wg_client_items, 'client')
-client_fields = field_defaults(client_def)
+client_fields = required_field_defaults(client_def)
 client_container = get_or_create_path(config_root, wg_client_mount + client_path[:-1])
 make_row(client_container, client_path[-1], client_fields, {
     'enabled': '1',
@@ -271,7 +284,7 @@ make_row(client_container, client_path[-1], client_fields, {
 sm_mount, sm_items = load_model(STUNMESH_MODEL)
 
 general_node = find_section(sm_items, 'general')
-general_fields = field_defaults(general_node)
+general_fields = required_field_defaults(general_node)
 general_container = get_or_create_path(config_root, sm_mount)
 general_el = get_or_create(general_container, 'general')
 merged_general = dict(general_fields)
@@ -282,7 +295,7 @@ for name, value in merged_general.items():
 
 # --- Stunmesh: one opendht builtin storage plugin ---
 plugin_path, plugin_def = find_array_field(sm_items, 'plugin')
-plugin_fields = field_defaults(plugin_def)
+plugin_fields = required_field_defaults(plugin_def)
 plugin_container = get_or_create_path(config_root, sm_mount + plugin_path[:-1])
 make_row(plugin_container, plugin_path[-1], plugin_fields, {
     'enabled': '1',
@@ -293,7 +306,7 @@ make_row(plugin_container, plugin_path[-1], plugin_fields, {
 
 # --- Stunmesh: one interface row referencing the WireGuard server ---
 iface_path, iface_def = find_array_field(sm_items, 'interface')
-iface_fields = field_defaults(iface_def)
+iface_fields = required_field_defaults(iface_def)
 iface_container = get_or_create_path(config_root, sm_mount + iface_path[:-1])
 make_row(iface_container, iface_path[-1], iface_fields, {
     'enabled': '1',
@@ -303,7 +316,7 @@ make_row(iface_container, iface_path[-1], iface_fields, {
 
 # --- Stunmesh: one peer row referencing the client, the server and the plugin ---
 peer_path, peer_def = find_array_field(sm_items, 'peer')
-peer_fields = field_defaults(peer_def)
+peer_fields = required_field_defaults(peer_def)
 peer_container = get_or_create_path(config_root, sm_mount + peer_path[:-1])
 make_row(peer_container, peer_path[-1], peer_fields, {
     'enabled': '1',
