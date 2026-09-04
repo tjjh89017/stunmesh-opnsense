@@ -14,14 +14,14 @@
     <field>
         <id>plugin.type</id>
         <label>Type</label>
-        <type>select</type>
+        <type>dropdown</type>
         <help>builtin uses a plugin compiled into stunmesh-go (Cloudflare or OpenDHT).
             exec and shell run an external helper program.</help>
     </field>
     <field>
         <id>plugin.builtin</id>
         <label>Builtin plugin</label>
-        <type>select</type>
+        <type>dropdown</type>
         <help>Only used when Type is builtin.</help>
     </field>
     <field>

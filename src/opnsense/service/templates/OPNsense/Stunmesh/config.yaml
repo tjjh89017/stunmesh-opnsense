@@ -6,7 +6,6 @@
 refresh_interval: "{{ OPNsense.stunmesh.general.refresh_interval|default('10m') }}"
 log:
   level: "{{ OPNsense.stunmesh.general.log_level|default('info') }}"
-  format: "{{ OPNsense.stunmesh.general.log_format|default('console') }}"
 stun:
   addresses: [{% for addr in (OPNsense.stunmesh.general.stun_addresses|default('')).split(',') %}{% if addr|trim != '' %}"{{ addr|trim|replace('"', '\\"') }}"{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}]
 {% if OPNsense.stunmesh.general.ping_interval|default('') != '' or OPNsense.stunmesh.general.ping_timeout|default('') != '' or OPNsense.stunmesh.general.ping_retries|default('') != '' %}

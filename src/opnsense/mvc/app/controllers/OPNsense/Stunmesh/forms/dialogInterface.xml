@@ -14,7 +14,7 @@
     <field>
         <id>interface.protocol</id>
         <label>Protocol</label>
-        <type>select</type>
+        <type>dropdown</type>
         <help>Which IP families to use for STUN discovery on this interface.</help>
     </field>
     <field>

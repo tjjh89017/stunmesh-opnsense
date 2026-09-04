@@ -58,7 +58,7 @@ The plugin adds a **VPN > STUNMESH** page with four tabs:
 
 - **General**: enable the service, choose the configuration source
   ("Generate from Interfaces and Peers" or "Custom YAML"), and set the
-  refresh interval, log level/format, STUN servers and default ping
+  refresh interval, log level, STUN servers and default ping
   settings used in generated mode. A "Show current config" button reads
   back the config file exactly as deployed on disk (via configd), and
   "Copy to editor" copies that text into the custom YAML box, client side

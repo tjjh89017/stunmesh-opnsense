@@ -54,14 +54,6 @@ plugins:
                     <error>error</error>
                 </OptionValues>
             </log_level>
-            <log_format type="OptionField">
-                <Default>console</Default>
-                <Required>Y</Required>
-                <OptionValues>
-                    <console>console</console>
-                    <json>json</json>
-                </OptionValues>
-            </log_format>
             <stun_addresses type="CSVListField">
                 <Default>stun.l.google.com:19302</Default>
                 <Required>Y</Required>

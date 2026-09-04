@@ -12,7 +12,7 @@
     <field>
         <id>stunmesh.general.mode</id>
         <label>Configuration source</label>
-        <type>select</type>
+        <type>dropdown</type>
         <help>Generate: the Interfaces, Peers and Storage plugins tabs produce
             /usr/local/etc/stunmesh/config.yaml on Apply. Custom YAML: the YAML
             below is written verbatim and REPLACES the generated file. The two
@@ -33,13 +33,7 @@
     <field>
         <id>stunmesh.general.log_level</id>
         <label>Log level</label>
-        <type>select</type>
-        <help>Used in generated mode.</help>
-    </field>
-    <field>
-        <id>stunmesh.general.log_format</id>
-        <label>Log format</label>
-        <type>select</type>
+        <type>dropdown</type>
         <help>Used in generated mode.</help>
     </field>
     <field>

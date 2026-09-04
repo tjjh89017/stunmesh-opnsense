@@ -26,7 +26,7 @@
     <field>
         <id>peer.protocol</id>
         <label>Protocol</label>
-        <type>select</type>
+        <type>dropdown</type>
         <help>Which IP family to use for this peer.</help>
     </field>
     <field>
