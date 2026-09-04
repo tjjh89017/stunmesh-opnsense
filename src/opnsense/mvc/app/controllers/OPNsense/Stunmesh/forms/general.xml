@@ -1,0 +1,21 @@
+<form>
+    <field>
+        <type>header</type>
+        <label>General Settings</label>
+    </field>
+    <field>
+        <id>stunmesh.general.enabled</id>
+        <label>Enable</label>
+        <type>checkbox</type>
+        <help>Enable or disable the stunmesh-go service.</help>
+    </field>
+    <field>
+        <id>stunmesh.general.config</id>
+        <label>Configuration</label>
+        <type>textbox</type>
+        <height>20</height>
+        <help>The full stunmesh-go YAML configuration, written verbatim to
+            /usr/local/etc/stunmesh/config.yaml. See
+            https://docs.stunmesh.dev for the configuration reference.</help>
+    </field>
+</form>

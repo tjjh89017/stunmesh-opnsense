@@ -1,0 +1,8 @@
+src/bin/
+dist-bin/
+out/
+site/
+work/
+*.pem
+*.pkg
+.claude/

@@ -1,0 +1,10 @@
+<acl>
+    <page-vpn-stunmesh>
+        <name>VPN: STUNMESH</name>
+        <description>Allow access to STUNMESH settings</description>
+        <patterns>
+            <pattern>ui/stunmesh/*</pattern>
+            <pattern>api/stunmesh/*</pattern>
+        </patterns>
+    </page-vpn-stunmesh>
+</acl>

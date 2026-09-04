@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# PROVIDE: stunmesh
+# REQUIRE: LOGIN
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="stunmesh"
+rcvar="stunmesh_enable"
+
+load_rc_config "${name}"
+
+: ${stunmesh_enable:="NO"}
+
+pidfile="/var/run/${name}.pid"
+command="/usr/sbin/daemon"
+command_args="-S -T stunmesh -f -p ${pidfile} -R 5 /usr/local/bin/stunmesh-go -c /usr/local/etc/stunmesh/config.yaml"
+
+run_rc_command "$1"

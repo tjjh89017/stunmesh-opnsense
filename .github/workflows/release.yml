@@ -1,0 +1,77 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  # Creates the draft up front so the upload job below only ever finds it.
+  # A draft is invisible to the get-release-by-tag API; softprops/action-gh-release
+  # falls back to listing releases, so this barrier avoids two concurrent
+  # runs each creating their own draft for the same tag.
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - name: tag
+        id: tag
+        run: echo "TAG=$(git describe --tags --dirty)" >> "$GITHUB_OUTPUT"
+      - name: Create draft release
+        uses: softprops/action-gh-release@v3
+        with:
+          draft: true
+          prerelease: >-
+            ${{
+              contains(steps.tag.outputs.TAG, 'RC') ||
+              contains(steps.tag.outputs.TAG, 'rc')
+            }}
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: create-release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build package
+        id: build
+        uses: ./.github/actions/build-package
+
+      - name: tag
+        id: tag
+        run: echo "TAG=$(git describe --tags --dirty)" >> "$GITHUB_OUTPUT"
+
+      # Renamed so each ABI's package is unambiguous as a release asset;
+      # colons in the ABI aren't valid in most download tooling/URLs, so
+      # they become dashes.
+      - name: Rename packages for release
+        id: rename
+        run: |
+          set -eu
+          mkdir -p release-assets
+          for abi_dir in ${{ steps.build.outputs.out-dir }}/*/; do
+            abi=$(basename -- "$abi_dir")
+            safe_abi=$(printf '%s' "$abi" | tr ':' '-')
+            for pkg in "$abi_dir"*.pkg; do
+              [ -e "$pkg" ] || continue
+              cp "$pkg" "release-assets/os-stunmesh-${{ steps.tag.outputs.TAG }}-${safe_abi}.pkg"
+            done
+          done
+          ls -l release-assets
+
+      - name: Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: release-assets/*.pkg
+          draft: true
+          prerelease: >-
+            ${{
+              contains(steps.tag.outputs.TAG, 'RC') ||
+              contains(steps.tag.outputs.TAG, 'rc')
+            }}

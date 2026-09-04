@@ -1,0 +1,5 @@
+<menu>
+    <VPN>
+        <Stunmesh order="210" VisibleName="STUNMESH" cssClass="fa fa-random" url="/ui/stunmesh/"/>
+    </VPN>
+</menu>

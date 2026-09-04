@@ -1,0 +1,127 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build package
+        id: build
+        uses: ./.github/actions/build-package
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages
+          path: ${{ steps.build.outputs.out-dir }}/
+          if-no-files-found: error
+
+  # Install smoke test in a real OPNsense VM (vmactions/opnsense-vm).
+  # vmactions/opnsense-vm currently offers only one release at a time
+  # (OPNsense 26.7, x86_64) -- see https://github.com/vmactions/opnsense-vm
+  # -- rather than one VM per ABI like the freebsd-vm build above, so the
+  # ABI to test is read from the VM itself (`pkg config ABI`) instead of
+  # being hardcoded here; whichever FreeBSD/arch pair that VM reports is
+  # the one exercised. Build stays on freebsd-vm: it is lighter than a
+  # full OPNsense boot and covers every ABI in one VM, which opnsense-vm
+  # cannot (no per-ABI override -- its pkg(8) belongs to the running
+  # OPNsense).
+  test:
+    name: Test install (OPNsense VM)
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: packages
+          path: packages
+
+      - name: Install and check package (OPNsense VM)
+        uses: vmactions/opnsense-vm@v1
+        with:
+          usesh: true
+          sync: rsync
+          copyback: false
+          run: |
+            set -eu
+            sh scripts/test-package.sh packages
+
+  # Publish the signed catalog to GitHub Pages so OPNsense hosts can add
+  # https://tjjh89017.github.io/stunmesh-opnsense/${ABI} as a repository.
+  # Only from main, so PR builds never touch the feed.
+  feed:
+    name: Publish feed
+    needs: [build, test]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: packages
+          path: site
+
+      # Written on the Linux host, before the VM step: vmactions' rsync
+      # sync copies the whole workspace into the VM, so the key must
+      # already be a plain file here for it to arrive there. Removed
+      # again in an "if: always()" step below, on the host, once the VM
+      # step (which reads it and never needs it again) has finished.
+      - name: Write signing key
+        env:
+          PKG_PRIVATE_KEY: ${{ secrets.PKG_PRIVATE_KEY }}
+        run: |
+          set -eu
+          if [ -z "$PKG_PRIVATE_KEY" ]; then
+            echo "::error::PKG_PRIVATE_KEY secret is empty; cannot sign the feed" >&2
+            exit 1
+          fi
+          printf '%s\n' "$PKG_PRIVATE_KEY" > key.pem
+          chmod 600 key.pem
+
+      - name: Sign and verify repo (FreeBSD VM)
+        uses: vmactions/freebsd-vm@v1
+        with:
+          release: "15.1"
+          usesh: true
+          sync: rsync
+          copyback: true
+          run: |
+            set -eu
+            sh scripts/build-repo.sh site key.pem keys/stunmesh.pub
+
+      - name: Remove signing key
+        if: always()
+        run: rm -f key.pem
+
+      - name: Assemble site
+        run: sh scripts/build-site.sh . site
+
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v5

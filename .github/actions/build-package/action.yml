@@ -1,0 +1,55 @@
+name: Build stunmesh-opnsense package
+description: >-
+  Fetch the stunmesh-go release binaries, check out opnsense/plugins, and
+  build the os-stunmesh .pkg for every OPNsense ABI in one FreeBSD VM.
+
+inputs:
+  abis:
+    description: 'Space-separated pkg ABI strings to build'
+    required: false
+    default: >-
+      FreeBSD:15:amd64 FreeBSD:14:amd64 FreeBSD:15:aarch64 FreeBSD:14:aarch64
+
+outputs:
+  out-dir:
+    description: 'Directory holding one subdirectory per ABI, each with its .pkg (relative to $GITHUB_WORKSPACE)'
+    value: out
+
+runs:
+  using: composite
+  steps:
+    # goarch amd64 covers ABI arch amd64; goarch arm64 covers ABI arch
+    # aarch64. Both go into dist-bin/, and build-package.sh (run inside
+    # the VM below) picks the right one per ABI before each build.
+    - name: Fetch stunmesh-go binary (amd64)
+      shell: bash
+      run: scripts/fetch-binary.sh amd64
+
+    - name: Fetch stunmesh-go binary (arm64)
+      shell: bash
+      run: scripts/fetch-binary.sh arm64
+
+    - name: Check out opnsense/plugins
+      uses: actions/checkout@v7
+      with:
+        repository: opnsense/plugins
+        ref: master
+        path: opnsense-plugins
+
+    - name: Build every ABI in a FreeBSD VM
+      uses: vmactions/freebsd-vm@v1
+      with:
+        release: "15.1"
+        usesh: true
+        sync: rsync
+        copyback: true
+        prepare: |
+          pkg bootstrap -y
+          pkg install -y rsync
+        run: |
+          set -eu
+          sh scripts/build-package.sh opnsense-plugins . out ${{ inputs.abis }}
+
+    - name: List built packages
+      shell: bash
+      run: find out -name '*.pkg' | sort

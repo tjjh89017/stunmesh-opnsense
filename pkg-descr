@@ -1,0 +1,7 @@
+stunmesh-go performs WireGuard NAT traversal by discovering each peer's
+public endpoint via STUN and publishing it through a pluggable rendezvous
+backend, such as the OpenDHT public DHT network. It keeps peer endpoints
+up to date so WireGuard tunnels between hosts behind NAT can establish
+and maintain connectivity without static port forwarding.
+
+WWW: https://github.com/tjjh89017/stunmesh-go

@@ -1,0 +1,3 @@
+{% if helpers.exists('OPNsense.stunmesh.general.enabled') and OPNsense.stunmesh.general.enabled == '1' %}
+{{ OPNsense.stunmesh.general.config }}
+{% endif %}

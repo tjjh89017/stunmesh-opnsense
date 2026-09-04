@@ -1,0 +1,2 @@
+stunmesh:/etc/rc.conf.d/stunmesh
+config.yaml:/usr/local/etc/stunmesh/config.yaml
