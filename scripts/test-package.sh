@@ -36,6 +36,11 @@ PKG_FILE=$(find "$PKG_DIR" -maxdepth 1 -name '*.pkg' | head -n1)
 [ -n "$PKG_FILE" ] || { echo "error: no .pkg found under $PKG_DIR" >&2; exit 1; }
 
 echo "::group::Install $PKG_FILE"
+# "pkg add" does not resolve dependencies from a remote repo, unlike
+# "pkg install"; the OPNsense VM has network access to the official
+# OPNsense mirror, so install PLUGIN_DEPENDS (wireguard-tools) from
+# there first, then "pkg add" the plugin package itself.
+pkg install -y wireguard-tools
 pkg add "$PKG_FILE"
 pkg info os-stunmesh
 echo "::endgroup::"
