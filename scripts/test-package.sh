@@ -147,13 +147,31 @@ def load_model(path):
     return mount_parts, items
 
 
+def is_row_definition(el):
+    """True if el defines an array row: it carries a 'type' attribute
+    (ArrayField in this plugin's own model, but core OPNsense models such
+    as Wireguard's use a custom class reference like ".\\ServerField")
+    and its own children are themselves field definitions (each has a
+    'type' attribute), as opposed to a leaf field such as a
+    ModelRelationField, whose children are structural (Model,
+    ValidationMessage, ...) and carry no 'type' attribute."""
+    if el.get('type') is None:
+        return False
+    children = list(el)
+    return bool(children) and any(c.get('type') is not None for c in children)
+
+
 def find_array_field(items, tag_name):
-    """Depth-first search for <tag_name type="ArrayField"> anywhere under
-    <items>. Returns (dotted_path_list_from_items, element)."""
+    """Depth-first search for the array-row definition named tag_name
+    anywhere under <items> (see is_row_definition). Matching stops at the
+    first (shallowest) hit, so an array field is found before any
+    same-named leaf field nested inside one of its own rows (e.g.
+    peers.peer.plugin, a ModelRelationField named like the top-level
+    plugins.plugin array it points to). Returns (dotted_path_list, element)."""
     def walk(node, path):
         for child in node:
             new_path = path + [child.tag]
-            if child.tag == tag_name and child.get('type') == 'ArrayField':
+            if child.tag == tag_name and is_row_definition(child):
                 return new_path, child
             found = walk(child, new_path)
             if found:
@@ -178,7 +196,11 @@ def find_section(items, dotted):
 def field_defaults(node):
     fields = {}
     for child in node:
-        if child.get('type') == 'ArrayField':
+        if is_row_definition(child):
+            continue
+        if child.get('volatile') == 'true':
+            # Runtime-only fields (e.g. cnfFilename, interface): not part
+            # of the persisted config.xml shape.
             continue
         d = child.find('Default')
         fields[child.tag] = d.text if d is not None and d.text is not None else ''
