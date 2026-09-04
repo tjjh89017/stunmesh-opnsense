@@ -18,11 +18,28 @@ jobs:
         id: build
         uses: ./.github/actions/build-package
 
+      # upload-artifact rejects ":" in artifact paths (NTFS-safe file
+      # names), but ABI strings look like "FreeBSD:15:amd64", so the
+      # colon-named ABI directories build-package.sh produces can't be
+      # uploaded as-is. Rename to dashes for the artifact only; the
+      # "test" and "feed" jobs rename back to colons right after
+      # downloading, since build-repo.sh/test-package.sh key off the
+      # real ABI string (colons and all).
+      - name: Sanitize ABI directory names for upload
+        run: |
+          set -eu
+          mkdir -p artifact-packages
+          for d in ${{ steps.build.outputs.out-dir }}/*/; do
+            abi=$(basename -- "$d")
+            safe_abi=$(printf '%s' "$abi" | tr ':' '-')
+            mv "$d" "artifact-packages/$safe_abi"
+          done
+
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: packages
-          path: ${{ steps.build.outputs.out-dir }}/
+          path: artifact-packages/
           if-no-files-found: error
 
   # Install smoke test in a real OPNsense VM (vmactions/opnsense-vm).
@@ -47,6 +64,18 @@ jobs:
         with:
           name: packages
           path: packages
+
+      # Reverse the dash-for-colon rename applied before upload (see the
+      # "build" job) so scripts/test-package.sh finds "$ABI" directories
+      # matching the real ABI string reported by `pkg config ABI`.
+      - name: Restore ABI directory names
+        run: |
+          set -eu
+          for d in packages/*/; do
+            safe_abi=$(basename -- "$d")
+            abi=$(printf '%s' "$safe_abi" | tr '-' ':')
+            [ "$safe_abi" = "$abi" ] || mv "$d" "packages/$abi"
+          done
 
       - name: Install and check package (OPNsense VM)
         uses: vmactions/opnsense-vm@v1
@@ -83,6 +112,19 @@ jobs:
         with:
           name: packages
           path: site
+
+      # Reverse the dash-for-colon rename applied before upload (see the
+      # "build" job) so scripts/build-repo.sh sees the real ABI strings
+      # as its per-ABI directory names, matching what dist/stunmesh.conf
+      # and pkg(8) expect.
+      - name: Restore ABI directory names
+        run: |
+          set -eu
+          for d in site/*/; do
+            safe_abi=$(basename -- "$d")
+            abi=$(printf '%s' "$safe_abi" | tr '-' ':')
+            [ "$safe_abi" = "$abi" ] || mv "$d" "site/$abi"
+          done
 
       # Written on the Linux host, before the VM step: vmactions' rsync
       # sync copies the whole workspace into the VM, so the key must
