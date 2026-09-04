@@ -1,0 +1,70 @@
+<form>
+    <field>
+        <id>plugin.enabled</id>
+        <label>Enable</label>
+        <type>checkbox</type>
+        <help>Enable this storage plugin.</help>
+    </field>
+    <field>
+        <id>plugin.name</id>
+        <label>Name</label>
+        <type>text</type>
+        <help>Unique plugin instance name, referenced by peers. Letters, digits, dash and underscore only.</help>
+    </field>
+    <field>
+        <id>plugin.type</id>
+        <label>Type</label>
+        <type>select</type>
+        <help>builtin uses a plugin compiled into stunmesh-go (Cloudflare or OpenDHT).
+            exec and shell run an external helper program.</help>
+    </field>
+    <field>
+        <id>plugin.builtin</id>
+        <label>Builtin plugin</label>
+        <type>select</type>
+        <help>Only used when Type is builtin.</help>
+    </field>
+    <field>
+        <id>plugin.endpoints</id>
+        <label>OpenDHT endpoints</label>
+        <type>text</type>
+        <help>Comma separated list of OpenDHT proxy URLs. Only used for the opendht builtin plugin.</help>
+    </field>
+    <field>
+        <id>plugin.cf_zone</id>
+        <label>Cloudflare zone</label>
+        <type>text</type>
+        <help>DNS zone name. Only used for the cloudflare builtin plugin.</help>
+    </field>
+    <field>
+        <id>plugin.cf_token</id>
+        <label>Cloudflare API token</label>
+        <type>text</type>
+        <help>Only used for the cloudflare builtin plugin.</help>
+    </field>
+    <field>
+        <id>plugin.cf_subdomain</id>
+        <label>Cloudflare subdomain</label>
+        <type>text</type>
+        <help>Only used for the cloudflare builtin plugin.</help>
+    </field>
+    <field>
+        <id>plugin.command</id>
+        <label>Command</label>
+        <type>text</type>
+        <help>Path to the external helper executable. Only used for the exec and shell plugin types.</help>
+    </field>
+    <field>
+        <id>plugin.dedup</id>
+        <label>Deduplicate</label>
+        <type>checkbox</type>
+        <advanced>true</advanced>
+        <help>Enable stunmesh-go's dedup mode for this plugin instance.</help>
+    </field>
+    <field>
+        <id>plugin.description</id>
+        <label>Description</label>
+        <type>text</type>
+        <help>Optional description, for reference only.</help>
+    </field>
+</form>

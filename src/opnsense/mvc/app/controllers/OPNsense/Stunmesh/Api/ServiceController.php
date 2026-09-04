@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (C) 2026 tjjh89017
+ * Copyright (C) 2026 Date Huang
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,4 +36,16 @@ class ServiceController extends ApiMutableServiceControllerBase
     protected static $internalServiceTemplate = 'OPNsense/Stunmesh';
     protected static $internalServiceEnabled = 'general.enabled';
     protected static $internalServiceName = 'stunmesh';
+
+    /**
+     * Return the rendered /usr/local/etc/stunmesh/config.yaml as it is on disk right now.
+     * @return array status and raw config text
+     */
+    public function showconfigAction()
+    {
+        $backend = new \OPNsense\Core\Backend();
+        $output = $backend->configdRun('stunmesh showconfig');
+
+        return ['status' => 'ok', 'config' => $output];
+    }
 }

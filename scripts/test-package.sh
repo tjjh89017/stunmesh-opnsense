@@ -82,4 +82,21 @@ else
 fi
 echo "::endgroup::"
 
+echo "::group::Run migrations (if available)"
+if [ -x /usr/local/opnsense/mvc/script/run_migrations.php ]; then
+	php /usr/local/opnsense/mvc/script/run_migrations.php
+	echo ">>> run_migrations.php exit 0"
+else
+	echo ">>> run_migrations.php not present, skipping"
+fi
+echo "::endgroup::"
+
+echo "::group::Render config.yaml template in generated mode"
+# configctl template reload must exit 0 whether or not the plugin is
+# enabled in /conf/config.xml: it only renders the Jinja templates, it
+# does not require a <stunmesh> config section to already exist.
+configctl template reload OPNsense/Stunmesh
+echo ">>> configctl template reload OPNsense/Stunmesh exit 0"
+echo "::endgroup::"
+
 echo ">>> Install smoke test OK for $ABI"

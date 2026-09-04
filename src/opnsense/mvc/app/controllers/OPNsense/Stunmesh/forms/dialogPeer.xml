@@ -1,0 +1,68 @@
+<form>
+    <field>
+        <id>peer.enabled</id>
+        <label>Enable</label>
+        <type>checkbox</type>
+        <help>Enable this peer entry.</help>
+    </field>
+    <field>
+        <id>peer.interface</id>
+        <label>WireGuard instance</label>
+        <type>dropdown</type>
+        <help>The local WireGuard instance this peer is attached to.</help>
+    </field>
+    <field>
+        <id>peer.peer</id>
+        <label>WireGuard peer</label>
+        <type>dropdown</type>
+        <help>The WireGuard peer (client) whose endpoint is tracked via STUN.</help>
+    </field>
+    <field>
+        <id>peer.plugin</id>
+        <label>Storage plugin</label>
+        <type>dropdown</type>
+        <help>Which storage plugin instance publishes and reads this peer's endpoint.</help>
+    </field>
+    <field>
+        <id>peer.protocol</id>
+        <label>Protocol</label>
+        <type>select</type>
+        <help>Which IP family to use for this peer.</help>
+    </field>
+    <field>
+        <id>peer.description</id>
+        <label>Description</label>
+        <type>text</type>
+        <help>Optional description, for reference only.</help>
+    </field>
+    <field>
+        <type>header</type>
+        <label>Ping Monitor</label>
+    </field>
+    <field>
+        <id>peer.ping_enabled</id>
+        <label>Enable ping monitor</label>
+        <type>checkbox</type>
+        <help>Actively probe this peer to detect and recover from stale endpoints.</help>
+    </field>
+    <field>
+        <id>peer.ping_target</id>
+        <label>Ping target</label>
+        <type>text</type>
+        <help>Address to ping, typically the peer's tunnel address.</help>
+    </field>
+    <field>
+        <id>peer.ping_interval</id>
+        <label>Ping interval</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>Go duration, e.g. 1s. Leave empty to use the global default.</help>
+    </field>
+    <field>
+        <id>peer.ping_timeout</id>
+        <label>Ping timeout</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>Go duration, e.g. 1s. Leave empty to use the global default.</help>
+    </field>
+</form>

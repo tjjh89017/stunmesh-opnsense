@@ -1,7 +1,7 @@
 <?php
 
 /**
- *    Copyright (C) 2026 tjjh89017
+ *    Copyright (C) 2026 Date Huang
  *
  *    All rights reserved.
  *
@@ -36,5 +36,8 @@ class IndexController extends \OPNsense\Base\IndexController
     {
         $this->view->pick('OPNsense/Stunmesh/index');
         $this->view->generalForm = $this->getForm('general');
+        $this->view->formDialogPlugin = $this->getForm('dialogPlugin');
+        $this->view->formDialogInterface = $this->getForm('dialogInterface');
+        $this->view->formDialogPeer = $this->getForm('dialogPeer');
     }
 }

@@ -1,3 +1,106 @@
 {% if helpers.exists('OPNsense.stunmesh.general.enabled') and OPNsense.stunmesh.general.enabled == '1' %}
+{% if OPNsense.stunmesh.general.mode|default('generated') == 'custom' %}
 {{ OPNsense.stunmesh.general.config }}
+{% else %}
+---
+refresh_interval: "{{ OPNsense.stunmesh.general.refresh_interval|default('10m') }}"
+log:
+  level: "{{ OPNsense.stunmesh.general.log_level|default('info') }}"
+  format: "{{ OPNsense.stunmesh.general.log_format|default('console') }}"
+stun:
+  addresses: [{% for addr in OPNsense.stunmesh.general.stun_addresses.split(',') %}{% if addr|trim != '' %}"{{ addr|trim|replace('"', '\\"') }}"{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}]
+{% if OPNsense.stunmesh.general.ping_interval|default('') != '' or OPNsense.stunmesh.general.ping_timeout|default('') != '' or OPNsense.stunmesh.general.ping_retries|default('') != '' %}
+ping_monitor:
+{% if OPNsense.stunmesh.general.ping_interval|default('') != '' %}
+  interval: "{{ OPNsense.stunmesh.general.ping_interval }}"
+{% endif %}
+{% if OPNsense.stunmesh.general.ping_timeout|default('') != '' %}
+  timeout: "{{ OPNsense.stunmesh.general.ping_timeout }}"
+{% endif %}
+{% if OPNsense.stunmesh.general.ping_retries|default('') != '' %}
+  fixed_retries: {{ OPNsense.stunmesh.general.ping_retries }}
+{% endif %}
+{% endif %}
+plugins:
+{% if helpers.exists('OPNsense.stunmesh.plugins.plugin') %}
+{% for plug in helpers.toList('OPNsense.stunmesh.plugins.plugin') %}
+{% if plug.enabled == '1' %}
+  "{{ plug.name|replace('"', '\\"') }}":
+    type: "{{ plug.type }}"
+{% if plug.type == 'builtin' %}
+    name: "{{ plug.builtin }}"
+{% if plug.builtin == 'opendht' %}
+    endpoints: [{% for ep in plug.endpoints.split(',') %}{% if ep|trim != '' %}"{{ ep|trim|replace('"', '\\"') }}"{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}]
+{% elif plug.builtin == 'cloudflare' %}
+    zone: "{{ plug.cf_zone|default('')|replace('"', '\\"') }}"
+    token: "{{ plug.cf_token|default('')|replace('"', '\\"') }}"
+    subdomain: "{{ plug.cf_subdomain|default('')|replace('"', '\\"') }}"
+{% endif %}
+{% else %}
+    command: "{{ plug.command|default('')|replace('"', '\\"') }}"
+{% endif %}
+{% if plug.dedup == '1' %}
+    dedup: true
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+interfaces:
+{% if helpers.exists('OPNsense.stunmesh.interfaces.interface') %}
+{% for iface in helpers.toList('OPNsense.stunmesh.interfaces.interface') %}
+{% if iface.enabled == '1' %}
+{% set wg_server = helpers.getUUID(iface.instance) %}
+{% if wg_server != {} and wg_server.enabled == '1' %}
+  "wg{{ wg_server.instance }}":
+    protocol: "{{ iface.protocol }}"
+{% if iface.proxy_enabled == '1' or iface.proxy_listen|default('') != '' or iface.proxy_fib|default('') != '' %}
+    proxy:
+      enabled: {{ 'true' if iface.proxy_enabled == '1' else 'false' }}
+{% if iface.proxy_listen|default('') != '' %}
+      listen: {{ iface.proxy_listen }}
+{% endif %}
+{% if iface.proxy_fib|default('') != '' %}
+      fib: {{ iface.proxy_fib }}
+{% endif %}
+{% endif %}
+{% if iface.listen_interfaces|default('') != '' %}
+    listen_interfaces: [{% for li in iface.listen_interfaces.split(',') %}{% if li|trim != '' %}"{{ li|trim|replace('"', '\\"') }}"{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}]
+{% endif %}
+    listen_default_route: {{ 'true' if iface.listen_default_route == '1' else 'false' }}
+    peers:
+{% if helpers.exists('OPNsense.stunmesh.peers.peer') %}
+{% for peer in helpers.toList('OPNsense.stunmesh.peers.peer') %}
+{% if peer.enabled == '1' and peer.interface == iface.instance %}
+{% set wg_peer = helpers.getUUID(peer.peer) %}
+{% set plug_row = helpers.getUUID(peer.plugin) %}
+{% if wg_peer != {} and wg_peer.enabled == '1' and plug_row != {} and plug_row.enabled == '1' %}
+      "{{ wg_peer.name|replace('"', '\\"') }}":
+{% if peer.description|default('') != '' %}
+        description: "{{ peer.description|replace('"', '\\"') }}"
+{% endif %}
+        public_key: "{{ wg_peer.pubkey }}"
+        plugin: "{{ plug_row.name|replace('"', '\\"') }}"
+        protocol: "{{ peer.protocol }}"
+{% if peer.ping_enabled == '1' %}
+        ping:
+          enabled: true
+{% if peer.ping_target|default('') != '' %}
+          target: "{{ peer.ping_target|replace('"', '\\"') }}"
+{% endif %}
+{% if peer.ping_interval|default('') != '' %}
+          interval: "{{ peer.ping_interval }}"
+{% endif %}
+{% if peer.ping_timeout|default('') != '' %}
+          timeout: "{{ peer.ping_timeout }}"
+{% endif %}
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endif %}
 {% endif %}

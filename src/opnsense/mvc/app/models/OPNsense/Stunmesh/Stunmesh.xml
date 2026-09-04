@@ -1,13 +1,21 @@
 <model>
     <mount>//OPNsense/stunmesh</mount>
     <description>Stunmesh configuration</description>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <items>
         <general>
             <enabled type="BooleanField">
                 <Default>0</Default>
                 <Required>Y</Required>
             </enabled>
+            <mode type="OptionField">
+                <Default>generated</Default>
+                <Required>Y</Required>
+                <OptionValues>
+                    <generated>Generate from Interfaces and Peers</generated>
+                    <custom>Custom YAML</custom>
+                </OptionValues>
+            </mode>
             <config type="TextField">
                 <Default><![CDATA[---
 refresh_interval: "1m"
@@ -29,6 +37,207 @@ plugins:
 ]]></Default>
                 <Required>Y</Required>
             </config>
+            <refresh_interval type="TextField">
+                <Default>10m</Default>
+                <Required>Y</Required>
+                <Mask>/^[0-9]+(ns|us|µs|ms|s|m|h)$/u</Mask>
+                <ValidationMessage>Enter a Go duration, e.g. 10m, 30s, 1h.</ValidationMessage>
+            </refresh_interval>
+            <log_level type="OptionField">
+                <Default>info</Default>
+                <Required>Y</Required>
+                <OptionValues>
+                    <trace>trace</trace>
+                    <debug>debug</debug>
+                    <info>info</info>
+                    <warn>warn</warn>
+                    <error>error</error>
+                </OptionValues>
+            </log_level>
+            <log_format type="OptionField">
+                <Default>console</Default>
+                <Required>Y</Required>
+                <OptionValues>
+                    <console>console</console>
+                    <json>json</json>
+                </OptionValues>
+            </log_format>
+            <stun_addresses type="CSVListField">
+                <Default>stun.l.google.com:19302</Default>
+                <Required>Y</Required>
+                <FieldSeparator>,</FieldSeparator>
+            </stun_addresses>
+            <ping_interval type="TextField">
+                <Mask>/^[0-9]+(ns|us|µs|ms|s|m|h)$/u</Mask>
+                <ValidationMessage>Enter a Go duration, e.g. 1s, 500ms.</ValidationMessage>
+            </ping_interval>
+            <ping_timeout type="TextField">
+                <Mask>/^[0-9]+(ns|us|µs|ms|s|m|h)$/u</Mask>
+                <ValidationMessage>Enter a Go duration, e.g. 1s, 500ms.</ValidationMessage>
+            </ping_timeout>
+            <ping_retries type="IntegerField">
+                <MinimumValue>0</MinimumValue>
+                <MaximumValue>255</MaximumValue>
+            </ping_retries>
         </general>
+        <plugins>
+            <plugin type="ArrayField">
+                <enabled type="BooleanField">
+                    <Default>1</Default>
+                    <Required>Y</Required>
+                </enabled>
+                <name type="TextField">
+                    <Required>Y</Required>
+                    <Mask>/^[A-Za-z0-9_-]+$/u</Mask>
+                    <ValidationMessage>Use only letters, digits, dash and underscore.</ValidationMessage>
+                    <Constraints>
+                        <check001>
+                            <ValidationMessage>Plugin name should be unique.</ValidationMessage>
+                            <type>UniqueConstraint</type>
+                        </check001>
+                    </Constraints>
+                </name>
+                <type type="OptionField">
+                    <Default>builtin</Default>
+                    <Required>Y</Required>
+                    <OptionValues>
+                        <builtin>builtin</builtin>
+                        <exec>exec</exec>
+                        <shell>shell</shell>
+                    </OptionValues>
+                </type>
+                <builtin type="OptionField">
+                    <OptionValues>
+                        <cloudflare>cloudflare</cloudflare>
+                        <opendht>opendht</opendht>
+                    </OptionValues>
+                </builtin>
+                <endpoints type="CSVListField">
+                    <FieldSeparator>,</FieldSeparator>
+                </endpoints>
+                <cf_zone type="TextField"/>
+                <cf_token type="TextField"/>
+                <cf_subdomain type="TextField"/>
+                <command type="TextField"/>
+                <dedup type="BooleanField">
+                    <Default>0</Default>
+                </dedup>
+                <description type="TextField"/>
+            </plugin>
+        </plugins>
+        <interfaces>
+            <interface type="ArrayField">
+                <enabled type="BooleanField">
+                    <Default>1</Default>
+                    <Required>Y</Required>
+                </enabled>
+                <instance type="ModelRelationField">
+                    <Model>
+                        <template>
+                            <source>OPNsense.Wireguard.Server</source>
+                            <items>servers.server</items>
+                            <display>name</display>
+                        </template>
+                    </Model>
+                    <ValidationMessage>Choose a WireGuard instance.</ValidationMessage>
+                    <Required>Y</Required>
+                    <Constraints>
+                        <check001>
+                            <ValidationMessage>Each WireGuard instance can only be configured once.</ValidationMessage>
+                            <type>UniqueConstraint</type>
+                        </check001>
+                    </Constraints>
+                </instance>
+                <protocol type="OptionField">
+                    <Default>ipv4</Default>
+                    <Required>Y</Required>
+                    <OptionValues>
+                        <ipv4>ipv4</ipv4>
+                        <ipv6>ipv6</ipv6>
+                        <dualstack>dualstack</dualstack>
+                    </OptionValues>
+                </protocol>
+                <proxy_enabled type="BooleanField">
+                    <Default>0</Default>
+                </proxy_enabled>
+                <proxy_listen type="PortField"/>
+                <proxy_fib type="IntegerField">
+                    <MinimumValue>0</MinimumValue>
+                    <MaximumValue>65535</MaximumValue>
+                </proxy_fib>
+                <listen_interfaces type="InterfaceField">
+                    <Multiple>Y</Multiple>
+                    <Required>N</Required>
+                </listen_interfaces>
+                <listen_default_route type="BooleanField">
+                    <Default>0</Default>
+                </listen_default_route>
+                <description type="TextField"/>
+            </interface>
+        </interfaces>
+        <peers>
+            <peer type="ArrayField">
+                <enabled type="BooleanField">
+                    <Default>1</Default>
+                    <Required>Y</Required>
+                </enabled>
+                <interface type="ModelRelationField">
+                    <Model>
+                        <template>
+                            <source>OPNsense.Wireguard.Server</source>
+                            <items>servers.server</items>
+                            <display>name</display>
+                        </template>
+                    </Model>
+                    <ValidationMessage>Choose a WireGuard instance.</ValidationMessage>
+                    <Required>Y</Required>
+                </interface>
+                <peer type="ModelRelationField">
+                    <Model>
+                        <template>
+                            <source>OPNsense.Wireguard.Client</source>
+                            <items>clients.client</items>
+                            <display>name</display>
+                        </template>
+                    </Model>
+                    <ValidationMessage>Choose a WireGuard peer.</ValidationMessage>
+                    <Required>Y</Required>
+                </peer>
+                <plugin type="ModelRelationField">
+                    <Model>
+                        <template>
+                            <source>OPNsense.Stunmesh.Stunmesh</source>
+                            <items>plugins.plugin</items>
+                            <display>name</display>
+                        </template>
+                    </Model>
+                    <ValidationMessage>Choose a storage plugin.</ValidationMessage>
+                    <Required>Y</Required>
+                </plugin>
+                <protocol type="OptionField">
+                    <Default>ipv4</Default>
+                    <Required>Y</Required>
+                    <OptionValues>
+                        <ipv4>ipv4</ipv4>
+                        <ipv6>ipv6</ipv6>
+                        <prefer_ipv4>prefer_ipv4</prefer_ipv4>
+                        <prefer_ipv6>prefer_ipv6</prefer_ipv6>
+                    </OptionValues>
+                </protocol>
+                <ping_enabled type="BooleanField">
+                    <Default>0</Default>
+                </ping_enabled>
+                <ping_target type="HostnameField"/>
+                <ping_interval type="TextField">
+                    <Mask>/^[0-9]+(ns|us|µs|ms|s|m|h)$/u</Mask>
+                    <ValidationMessage>Enter a Go duration, e.g. 1s, 500ms.</ValidationMessage>
+                </ping_interval>
+                <ping_timeout type="TextField">
+                    <Mask>/^[0-9]+(ns|us|µs|ms|s|m|h)$/u</Mask>
+                    <ValidationMessage>Enter a Go duration, e.g. 1s, 500ms.</ValidationMessage>
+                </ping_timeout>
+                <description type="TextField"/>
+            </peer>
+        </peers>
     </items>
 </model>

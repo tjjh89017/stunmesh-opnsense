@@ -10,12 +10,77 @@
         <help>Enable or disable the stunmesh-go service.</help>
     </field>
     <field>
+        <id>stunmesh.general.mode</id>
+        <label>Configuration source</label>
+        <type>select</type>
+        <help>"Generate from Interfaces and Peers" builds the configuration from the
+            Storage plugins, Interfaces and Peers tabs below. "Custom YAML" writes
+            the text in the Configuration box below verbatim instead.</help>
+    </field>
+    <field>
+        <type>header</type>
+        <label>Generated Options</label>
+    </field>
+    <field>
+        <id>stunmesh.general.refresh_interval</id>
+        <label>Refresh interval</label>
+        <type>text</type>
+        <help>How often stunmesh-go refreshes peer endpoints, as a Go duration (e.g. 10m, 30s). Used in generated mode.</help>
+    </field>
+    <field>
+        <id>stunmesh.general.log_level</id>
+        <label>Log level</label>
+        <type>select</type>
+        <help>Used in generated mode.</help>
+    </field>
+    <field>
+        <id>stunmesh.general.log_format</id>
+        <label>Log format</label>
+        <type>select</type>
+        <help>Used in generated mode.</help>
+    </field>
+    <field>
+        <id>stunmesh.general.stun_addresses</id>
+        <label>STUN servers</label>
+        <type>text</type>
+        <help>Comma separated list of host:port STUN servers. Used in generated mode.</help>
+    </field>
+    <field>
+        <id>stunmesh.general.ping_interval</id>
+        <label>Default ping interval</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>Optional global default ping interval, as a Go duration (e.g. 1s). Used in generated mode.</help>
+    </field>
+    <field>
+        <id>stunmesh.general.ping_timeout</id>
+        <label>Default ping timeout</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>Optional global default ping timeout, as a Go duration (e.g. 1s). Used in generated mode.</help>
+    </field>
+    <field>
+        <id>stunmesh.general.ping_retries</id>
+        <label>Default ping fixed retries</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>Optional global default number of fixed ping retries. Used in generated mode.</help>
+    </field>
+    <field>
+        <type>header</type>
+        <label>Custom YAML</label>
+    </field>
+    <field>
         <id>stunmesh.general.config</id>
         <label>Configuration</label>
         <type>textbox</type>
         <height>20</height>
         <help>The full stunmesh-go YAML configuration, written verbatim to
-            /usr/local/etc/stunmesh/config.yaml. See
-            https://docs.stunmesh.dev for the configuration reference.</help>
+            /usr/local/etc/stunmesh/config.yaml when the configuration source is
+            "Custom YAML". See https://docs.stunmesh.dev for the configuration
+            reference. The file on disk is regenerated only when Apply is pressed;
+            use "Show current config" below to see what is currently deployed. In
+            "Generate from Interfaces and Peers" mode, the shown file is what the
+            Interfaces and Peers tabs produce, and this box is ignored.</help>
     </field>
 </form>

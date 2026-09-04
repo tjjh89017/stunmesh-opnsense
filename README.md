@@ -54,9 +54,30 @@ repo; see [`keys/README.md`](keys/README.md).
 
 ## Configuration
 
-The plugin adds a **VPN > STUNMESH** page: enable the service, paste the
-stunmesh-go YAML config, and Apply. The config is written to
-`/usr/local/etc/stunmesh/config.yaml`. The service shows up under
+The plugin adds a **VPN > STUNMESH** page with four tabs:
+
+- **General**: enable the service, choose the configuration source
+  ("Generate from Interfaces and Peers" or "Custom YAML"), and set the
+  refresh interval, log level/format, STUN servers and default ping
+  settings used in generated mode. A "Show current config" button reads
+  back the config file exactly as deployed on disk (via configd), and
+  "Copy to editor" copies that text into the custom YAML box, client side
+  only.
+- **Storage plugins**: the stunmesh-go storage backends (builtin
+  Cloudflare/OpenDHT, or an external `exec`/`shell` command) that peers
+  publish and read their endpoints through.
+- **Interfaces**: which WireGuard instances stunmesh-go manages, with
+  per-interface protocol and proxy/listen options.
+- **Peers**: which WireGuard peers get STUN-tracked endpoints, mapping
+  each one to an interface and a storage plugin, with optional ping
+  monitoring.
+
+In "Generate from Interfaces and Peers" mode the config file is built
+from the three tabs above. In "Custom YAML" mode the text in the
+Configuration box on the General tab is written verbatim instead; the
+Storage plugins, Interfaces and Peers tabs are ignored in that mode.
+Either way the config is written to `/usr/local/etc/stunmesh/config.yaml`
+only when Apply is pressed. The service shows up under
 **Status > Services** once enabled. stunmesh-go logs via `daemon -S` to
 syslog, visible under **System > Log Files > General**.
 

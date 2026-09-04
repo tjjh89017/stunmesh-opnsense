@@ -1,0 +1,69 @@
+<form>
+    <field>
+        <id>interface.enabled</id>
+        <label>Enable</label>
+        <type>checkbox</type>
+        <help>Enable stunmesh-go for this WireGuard instance.</help>
+    </field>
+    <field>
+        <id>interface.instance</id>
+        <label>WireGuard instance</label>
+        <type>dropdown</type>
+        <help>The WireGuard server instance (wgN device) to manage.</help>
+    </field>
+    <field>
+        <id>interface.protocol</id>
+        <label>Protocol</label>
+        <type>select</type>
+        <help>Which IP families to use for STUN discovery on this interface.</help>
+    </field>
+    <field>
+        <id>interface.description</id>
+        <label>Description</label>
+        <type>text</type>
+        <help>Optional description, for reference only.</help>
+    </field>
+    <field>
+        <type>header</type>
+        <label>Proxy (FreeBSD)</label>
+    </field>
+    <field>
+        <id>interface.proxy_enabled</id>
+        <label>Enable proxy</label>
+        <type>checkbox</type>
+        <advanced>true</advanced>
+        <help>Front this interface with the stunmesh-go UDP proxy.</help>
+    </field>
+    <field>
+        <id>interface.proxy_listen</id>
+        <label>Proxy listen port</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>Outer-socket port for the proxy. Leave empty for an ephemeral port.</help>
+    </field>
+    <field>
+        <id>interface.proxy_fib</id>
+        <label>Proxy FIB</label>
+        <type>text</type>
+        <advanced>true</advanced>
+        <help>Routing table (FIB) number used as the escape route for the proxy. 0 disables the escape.</help>
+    </field>
+    <field>
+        <type>header</type>
+        <label>STUN Listen (FreeBSD)</label>
+    </field>
+    <field>
+        <id>interface.listen_interfaces</id>
+        <label>Underlay listen interfaces</label>
+        <type>dropdown</type>
+        <advanced>true</advanced>
+        <help>Restrict which underlay interfaces STUN replies are captured on. Leave empty to listen on all eligible interfaces.</help>
+    </field>
+    <field>
+        <id>interface.listen_default_route</id>
+        <label>Also listen on default route interface</label>
+        <type>checkbox</type>
+        <advanced>true</advanced>
+        <help>Additionally listen on the interface holding the default route.</help>
+    </field>
+</form>

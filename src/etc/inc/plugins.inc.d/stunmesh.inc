@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (C) 2026 tjjh89017
+ * Copyright (C) 2026 Date Huang
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
