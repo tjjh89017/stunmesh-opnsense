@@ -396,6 +396,31 @@ else
 fi
 echo "::endgroup::"
 
+echo "::group::Render config preview and compare against the deployed config.yaml"
+RENDER_SCRIPT=/usr/local/opnsense/scripts/stunmesh/render_config.py
+[ -x "$RENDER_SCRIPT" ] || { echo "error: $RENDER_SCRIPT missing or not executable" >&2; exit 1; }
+
+RENDER_OUTPUT=$(mktemp)
+"$RENDER_SCRIPT" > "$RENDER_OUTPUT"
+echo ">>> render_config.py exit 0"
+echo ">>> render_config.py output:"
+cat "$RENDER_OUTPUT"
+
+diff -u "$CONFIG_YAML" "$RENDER_OUTPUT" || { echo "error: render_config.py output differs from the deployed config.yaml" >&2; exit 1; }
+echo ">>> render_config.py output matches $CONFIG_YAML"
+
+PREVIEW_OUTPUT=$(mktemp)
+configctl stunmesh preview > "$PREVIEW_OUTPUT"
+echo ">>> configctl stunmesh preview exit 0"
+echo ">>> configctl stunmesh preview output:"
+cat "$PREVIEW_OUTPUT"
+
+diff -u "$CONFIG_YAML" "$PREVIEW_OUTPUT" || { echo "error: configctl stunmesh preview output differs from the deployed config.yaml" >&2; exit 1; }
+echo ">>> configctl stunmesh preview output matches $CONFIG_YAML"
+
+rm -f "$RENDER_OUTPUT" "$PREVIEW_OUTPUT"
+echo "::endgroup::"
+
 echo "::group::Run stunmesh-go -oneshot against the generated config"
 run_stunmesh_oneshot() {
 	timeout 20 /usr/local/bin/stunmesh-go -c "$CONFIG_YAML" -oneshot 2>&1

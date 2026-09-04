@@ -59,10 +59,13 @@ The plugin adds a **VPN > STUNMESH** page with four tabs:
 - **General**: enable the service, choose the configuration source
   ("Generate from Interfaces and Peers" or "Custom YAML"), and set the
   refresh interval, log level, STUN servers and default ping
-  settings used in generated mode. A "Show current config" button reads
-  back the config file exactly as deployed on disk (via configd), and
-  "Copy to editor" copies that text into the custom YAML box, client side
-  only.
+  settings used in generated mode. A "Generated config preview" panel
+  shows the config.yaml that would be produced from the currently saved
+  settings, rendered live by configd; it does not touch
+  `/usr/local/etc/stunmesh/config.yaml` on disk. It refreshes automatically
+  on page load, when the General tab is shown, and after any storage
+  plugin/interface/peer change, or on demand with "Refresh preview"; "Copy
+  to editor" copies its text into the custom YAML box, client side only.
 - **Storage plugins**: the stunmesh-go storage backends (builtin
   Cloudflare/OpenDHT, or an external `exec`/`shell` command) that peers
   publish and read their endpoints through.

@@ -36,7 +36,7 @@
         line-height: 1.4;
         height: 20rem;
     }
-    #stunmesh-current-config {
+    #stunmesh-preview {
         font-family: monospace;
         white-space: pre;
         overflow-wrap: normal;
@@ -87,12 +87,29 @@
         toggleRow('peer.ping_timeout', enabled);
     }
 
+    // Saves the General tab, then re-renders the config preview from the
+    // saved model via configd (no write to /usr/local/etc/stunmesh/config.yaml).
+    function refreshPreview() {
+        var dfObj = $.Deferred();
+        saveFormToEndpoint("/api/stunmesh/settings/set", 'frm_GeneralSettings', dfObj.resolve, true, dfObj.reject);
+        dfObj.done(function() {
+            ajaxCall(url = "/api/stunmesh/service/preview", sendData = {}, callback = function(data, status) {
+                if (status != "success" || data['status'] != 'ok') {
+                    $("#stunmesh-preview").text("{{ lang._('Unable to render the configuration preview.') }}");
+                } else {
+                    $("#stunmesh-preview").text(data['config']);
+                }
+            });
+        });
+    }
+
     $(document).ready(function() {
         mapDataToFormUI({'frm_GeneralSettings': "/api/stunmesh/settings/get"}).done(function() {
             formatTokenizersUI();
             $('.selectpicker').selectpicker('refresh');
             updateServiceControlUI('stunmesh');
             toggleGeneralMode();
+            refreshPreview();
         });
 
         $("#stunmesh\\.general\\.mode").change(toggleGeneralMode);
@@ -122,7 +139,7 @@
                 del:'/api/stunmesh/settings/del_plugin/',
                 toggle:'/api/stunmesh/settings/toggle_plugin/'
             }
-        );
+        ).on('loaded.rs.jquery.bootgrid', refreshPreview);
 
         $("#grid-interfaces").UIBootgrid(
             {   search:'/api/stunmesh/settings/search_interface',
@@ -132,7 +149,7 @@
                 del:'/api/stunmesh/settings/del_interface/',
                 toggle:'/api/stunmesh/settings/toggle_interface/'
             }
-        );
+        ).on('loaded.rs.jquery.bootgrid', refreshPreview);
 
         $("#grid-peers").UIBootgrid(
             {   search:'/api/stunmesh/settings/search_peer',
@@ -142,26 +159,19 @@
                 del:'/api/stunmesh/settings/del_peer/',
                 toggle:'/api/stunmesh/settings/toggle_peer/'
             }
-        );
+        ).on('loaded.rs.jquery.bootgrid', refreshPreview);
 
-        // "Show current config" reads the deployed /usr/local/etc/stunmesh/config.yaml
-        // via configd, regardless of configuration source.
-        $("#showConfigAct").click(function(event) {
+        $('a[data-toggle="tab"][href="#general"]').on('shown.bs.tab', refreshPreview);
+
+        $("#refreshPreviewAct").click(function(event) {
             event.preventDefault();
-            ajaxCall(url = "/api/stunmesh/service/showconfig", sendData = {}, callback = function(data, status) {
-                if (status != "success" || data['status'] != 'ok') {
-                    $("#stunmesh-current-config").text("{{ lang._('Unable to read the current configuration.') }}");
-                } else {
-                    $("#stunmesh-current-config").text(data['config']);
-                }
-                $("#stunmesh-current-config-box").removeClass("hidden");
-            });
+            refreshPreview();
         });
 
-        // Copies the shown text into the custom YAML editor, client side only.
+        // Copies the shown preview into the custom YAML editor, client side only.
         $("#copyConfigAct").click(function(event) {
             event.preventDefault();
-            $("#stunmesh\\.general\\.config").val($("#stunmesh-current-config").text());
+            $("#stunmesh\\.general\\.config").val($("#stunmesh-preview").text());
         });
     });
 </script>
@@ -177,12 +187,12 @@
     <div id="general" class="tab-pane fade in active">
         {{ partial('layout_partials/base_form', ['fields': generalForm, 'id': 'frm_GeneralSettings']) }}
         <div class="col-md-12">
-            <button class="btn btn-default" id="showConfigAct" type="button">{{ lang._('Show current config') }}</button>
-            <button class="btn btn-default" id="copyConfigAct" type="button">{{ lang._('Copy to editor') }}</button>
             <p><small class="text-muted">{{ lang._('Custom YAML fully replaces the generated configuration; it is not merged with the tables.') }}</small></p>
-            <div id="stunmesh-current-config-box" class="hidden">
-                <pre id="stunmesh-current-config"></pre>
-            </div>
+            <h4>{{ lang._('Generated config preview') }}</h4>
+            <button class="btn btn-default" id="refreshPreviewAct" type="button">{{ lang._('Refresh preview') }}</button>
+            <button class="btn btn-default" id="copyConfigAct" type="button">{{ lang._('Copy to editor') }}</button>
+            <pre id="stunmesh-preview"></pre>
+            <p><small class="text-muted">{{ lang._('Preview is rendered from saved settings. Apply writes it to /usr/local/etc/stunmesh/config.yaml and restarts the service.') }}</small></p>
         </div>
     </div>
     <div id="plugins" class="tab-pane fade in">

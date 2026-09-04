@@ -38,13 +38,14 @@ class ServiceController extends ApiMutableServiceControllerBase
     protected static $internalServiceName = 'stunmesh';
 
     /**
-     * Return the rendered /usr/local/etc/stunmesh/config.yaml as it is on disk right now.
-     * @return array status and raw config text
+     * Render the config.yaml that would be generated from the currently saved
+     * model, without writing /usr/local/etc/stunmesh/config.yaml.
+     * @return array status and raw rendered config text
      */
-    public function showconfigAction()
+    public function previewAction()
     {
         $backend = new \OPNsense\Core\Backend();
-        $output = $backend->configdRun('stunmesh showconfig');
+        $output = $backend->configdRun('stunmesh preview');
 
         return ['status' => 'ok', 'config' => $output];
     }
