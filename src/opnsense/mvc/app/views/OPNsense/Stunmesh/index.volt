@@ -53,10 +53,56 @@
 </style>
 
 <script>
+    // Hides or shows a form row for the given field id (e.g. "stunmesh.general.mode").
+    function toggleRow(fieldId, visible) {
+        $("#row_" + fieldId.replace(/\./g, '\\.')).toggle(visible);
+    }
+
+    function toggleGeneralMode() {
+        toggleRow('stunmesh.general.config', $("#stunmesh\\.general\\.mode").val() == 'custom');
+    }
+
+    function togglePluginFields() {
+        var type = $("#plugin\\.type").val();
+        var builtin = $("#plugin\\.builtin").val();
+        var isBuiltin = type == 'builtin';
+        toggleRow('plugin.builtin', isBuiltin);
+        toggleRow('plugin.command', !isBuiltin);
+        toggleRow('plugin.endpoints', isBuiltin && builtin == 'opendht');
+        toggleRow('plugin.cf_zone', isBuiltin && builtin == 'cloudflare');
+        toggleRow('plugin.cf_token', isBuiltin && builtin == 'cloudflare');
+        toggleRow('plugin.cf_subdomain', isBuiltin && builtin == 'cloudflare');
+    }
+
+    function toggleInterfaceFields() {
+        var enabled = $("#interface\\.proxy_enabled").is(':checked');
+        toggleRow('interface.proxy_listen', enabled);
+        toggleRow('interface.proxy_fib', enabled);
+    }
+
+    function togglePeerFields() {
+        var enabled = $("#peer\\.ping_enabled").is(':checked');
+        toggleRow('peer.ping_target', enabled);
+        toggleRow('peer.ping_interval', enabled);
+        toggleRow('peer.ping_timeout', enabled);
+    }
+
     $(document).ready(function() {
         mapDataToFormUI({'frm_GeneralSettings': "/api/stunmesh/settings/get"}).done(function() {
             updateServiceControlUI('stunmesh');
+            toggleGeneralMode();
         });
+
+        $("#stunmesh\\.general\\.mode").change(toggleGeneralMode);
+
+        $("#plugin\\.type, #plugin\\.builtin").change(togglePluginFields);
+        $("#DialogPlugin").on('shown.bs.modal', togglePluginFields);
+
+        $("#interface\\.proxy_enabled").change(toggleInterfaceFields);
+        $("#DialogInterface").on('shown.bs.modal', toggleInterfaceFields);
+
+        $("#peer\\.ping_enabled").change(togglePeerFields);
+        $("#DialogPeer").on('shown.bs.modal', togglePeerFields);
 
         $("#reconfigureAct").SimpleActionButton({
             onPreAction: function() {
