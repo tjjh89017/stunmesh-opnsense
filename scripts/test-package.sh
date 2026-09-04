@@ -35,6 +35,12 @@ PKG_DIR="$PACKAGES_DIR/$ABI"
 PKG_FILE=$(find "$PKG_DIR" -maxdepth 1 -name '*.pkg' | head -n1)
 [ -n "$PKG_FILE" ] || { echo "error: no .pkg found under $PKG_DIR" >&2; exit 1; }
 
+echo "::group::Diagnose wireguard-tools availability (temporary)"
+command -v wg || echo "no wg in PATH"
+pkg info | grep -i wire || echo "no wire* pkg installed"
+pkg search -Q comment wireguard || echo "no wireguard match in pkg search"
+echo "::endgroup::"
+
 echo "::group::Install $PKG_FILE"
 # "pkg add" does not resolve dependencies from a remote repo, unlike
 # "pkg install"; the OPNsense VM has network access to the official
