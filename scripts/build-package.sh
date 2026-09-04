@@ -27,13 +27,15 @@
 # precedes the "create" subcommand, and "create"'s own "-o <dir>" output
 # flag comes after it.
 #
-# PLUGIN_DEPENDS (wireguard-tools) is installed once, up front, with the
+# Any PLUGIN_DEPENDS entries are installed once, up front, with the
 # host's native (non-overridden) pkg -- not per ABI. Mk/plugins.mk's
 # "package" target runs "${PKG} install -yA <dep>" only when
 # "${PKG} info <dep>" reports it missing; pre-installing it here means
 # that check always finds it already present, so the per-ABI ABI
 # override never has to fetch a package from a repo that may not carry
-# a matching catalog for that overridden ABI.
+# a matching catalog for that overridden ABI. The plugin currently has
+# none: WireGuard (wg(4) plus the "wg" CLI) ships in OPNsense's base
+# image, not as a separate pkg -- see the Makefile.
 
 set -eu
 
