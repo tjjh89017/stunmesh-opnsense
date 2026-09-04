@@ -12,10 +12,10 @@ The stunmesh-go binary is downloaded prebuilt from upstream's GitHub
 releases (FreeBSD amd64/arm64), so this feed just repackages it; only the
 `abi`/`arch` tag in the package manifest differs per target:
 
-| OPNsense series | FreeBSD base | amd64 | aarch64 |
-| --- | --- | --- | --- |
-| 26.x | FreeBSD 15 | `FreeBSD:15:amd64` | `FreeBSD:15:aarch64` |
-| 25.x | FreeBSD 14 | `FreeBSD:14:amd64` | `FreeBSD:14:aarch64` |
+| OPNsense series | amd64 | aarch64 |
+| --- | --- | --- |
+| 26.x | `FreeBSD:15:amd64` | `FreeBSD:15:aarch64` |
+| 25.x | `FreeBSD:14:amd64` | `FreeBSD:14:aarch64` |
 
 ## Install from the signed feed (recommended)
 

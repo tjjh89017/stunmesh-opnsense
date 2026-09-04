@@ -42,9 +42,21 @@ cp "$REPO_ROOT/keys/stunmesh.pub" "$SITE_DIR/stunmesh.pub"
 	echo '<li><a href="stunmesh.conf">stunmesh.conf</a> -- /usr/local/etc/pkg/repos/stunmesh.conf</li>'
 	echo '<li><a href="install.sh">install.sh</a> -- one-line installer</li>'
 	echo '</ul>'
-	echo '<h2>ABIs</h2><ul>'
+	echo '<h2>OPNsense versions</h2><ul>'
 	( cd "$SITE_DIR" && find . -mindepth 1 -maxdepth 1 -type d | sed 's|^\./||' | sort ) | while read -r abi; do
-		echo "<li><strong>$abi</strong><ul>"
+		# Directory names stay the raw pkg ABI string (colons and
+		# all) -- stunmesh.conf's "${ABI}" needs that exact form.
+		# The visible label instead names the OPNsense series, since
+		# that's what a reader picks a directory by, not the FreeBSD
+		# base version underneath it.
+		freebsd_rel=$(printf '%s' "$abi" | cut -d: -f2)
+		arch=$(printf '%s' "$abi" | cut -d: -f3)
+		case "$freebsd_rel" in
+			15) opnsense_series="OPNsense 26.x" ;;
+			14) opnsense_series="OPNsense 25.x" ;;
+			*) opnsense_series="OPNsense (FreeBSD $freebsd_rel)" ;;
+		esac
+		echo "<li><strong>$opnsense_series ($arch)</strong><ul>"
 		( cd "$SITE_DIR/$abi" && find . -mindepth 1 -maxdepth 1 -type f | sed 's|^\./||' | sort ) | while read -r f; do
 			# "./" prefix: a colon in the first path segment of a
 			# relative URL (ABI names look like "FreeBSD:15:amd64")
