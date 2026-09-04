@@ -13,9 +13,12 @@
         <id>stunmesh.general.mode</id>
         <label>Configuration source</label>
         <type>select</type>
-        <help>"Generate from Interfaces and Peers" builds the configuration from the
-            Storage plugins, Interfaces and Peers tabs below. "Custom YAML" writes
-            the text in the Configuration box below verbatim instead.</help>
+        <help>Generate: the Interfaces, Peers and Storage plugins tabs produce
+            /usr/local/etc/stunmesh/config.yaml on Apply. Custom YAML: the YAML
+            below is written verbatim and REPLACES the generated file. The two
+            modes are not merged: in Custom YAML mode, changes on the other tabs
+            have no effect until you copy the generated config into the editor
+            again.</help>
     </field>
     <field>
         <type>header</type>
@@ -75,12 +78,10 @@
         <label>Configuration</label>
         <type>textbox</type>
         <height>20</height>
-        <help>The full stunmesh-go YAML configuration, written verbatim to
-            /usr/local/etc/stunmesh/config.yaml when the configuration source is
-            "Custom YAML". See https://docs.stunmesh.dev for the configuration
-            reference. The file on disk is regenerated only when Apply is pressed;
-            use "Show current config" below to see what is currently deployed. In
-            "Generate from Interfaces and Peers" mode, the shown file is what the
-            Interfaces and Peers tabs produce, and this box is ignored.</help>
+        <help>Used only in Custom YAML mode. Use "Show current config" and "Copy
+            to editor" to start from the generated file, then add options the web
+            UI does not expose (proxy, listen_interfaces, ping_monitor,
+            exec/shell plugin args, ...). See https://docs.stunmesh.dev for every
+            key.</help>
     </field>
 </form>

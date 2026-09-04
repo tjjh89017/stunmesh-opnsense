@@ -131,6 +131,7 @@
         <div class="col-md-12">
             <button class="btn btn-default" id="showConfigAct" type="button">{{ lang._('Show current config') }}</button>
             <button class="btn btn-default" id="copyConfigAct" type="button">{{ lang._('Copy to editor') }}</button>
+            <p><small class="text-muted">{{ lang._('Custom YAML fully replaces the generated configuration; it is not merged with the tables.') }}</small></p>
             <div id="stunmesh-current-config-box" class="hidden">
                 <pre id="stunmesh-current-config"></pre>
             </div>

@@ -75,7 +75,10 @@ The plugin adds a **VPN > STUNMESH** page with four tabs:
 In "Generate from Interfaces and Peers" mode the config file is built
 from the three tabs above. In "Custom YAML" mode the text in the
 Configuration box on the General tab is written verbatim instead; the
-Storage plugins, Interfaces and Peers tabs are ignored in that mode.
+Storage plugins, Interfaces and Peers tabs are ignored in that mode. The
+two modes are not merged: Custom YAML fully replaces the generated file,
+so switching to it keeps whatever was last written until you paste a
+fresh copy in with "Copy to editor".
 Either way the config is written to `/usr/local/etc/stunmesh/config.yaml`
 only when Apply is pressed. The service shows up under
 **Status > Services** once enabled. stunmesh-go logs via `daemon -S` to
