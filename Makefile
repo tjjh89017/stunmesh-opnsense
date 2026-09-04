@@ -7,7 +7,7 @@ PLUGIN_REVISION=	2
 PLUGIN_COMMENT=		WireGuard NAT traversal with STUN (stunmesh-go)
 PLUGIN_MAINTAINER=	tjjh89017@hotmail.com
 PLUGIN_WWW=		https://github.com/tjjh89017/stunmesh-go
-PLUGIN_LICENSE=		LGPL3
+# No PLUGIN_LICENSE: plugins.mk defaults to BSD2CLAUSE, which matches this repo.
 PLUGIN_DEVEL=
 # No PLUGIN_DEPENDS: stunmesh-go shells out to "wg", which ships in
 # OPNsense's base image (wg(4) plus the CLI) rather than as a separate

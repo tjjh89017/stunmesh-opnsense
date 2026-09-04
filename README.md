@@ -133,5 +133,9 @@ new key.
 
 ## License
 
-LGPL-3.0-or-later, same as stunmesh-go. See [LICENSE](LICENSE) (LGPL-3.0)
-and [LICENSE.GPL](LICENSE.GPL) (GPL-3.0, which the LGPL supplements).
+The plugin code in this repository is BSD-2-Clause. See [LICENSE](LICENSE).
+
+The packaged `stunmesh-go` binary is a separate upstream project licensed
+LGPL-3.0-or-later; its source is at
+https://github.com/tjjh89017/stunmesh-go. The package's `pkg` license
+field reflects this repository's plugin code, BSD2CLAUSE.
