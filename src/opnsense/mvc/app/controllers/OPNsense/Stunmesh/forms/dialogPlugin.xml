@@ -27,8 +27,10 @@
     <field>
         <id>plugin.endpoints</id>
         <label>OpenDHT endpoints</label>
-        <type>text</type>
-        <help>Comma separated list of OpenDHT proxy URLs. Only used for the opendht builtin plugin.</help>
+        <type>select_multiple</type>
+        <style>tokenize</style>
+        <allownew>true</allownew>
+        <help>List of OpenDHT proxy URLs. Only used for the opendht builtin plugin.</help>
     </field>
     <field>
         <id>plugin.cf_zone</id>

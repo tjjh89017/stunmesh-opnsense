@@ -55,7 +55,7 @@
     <field>
         <id>interface.listen_interfaces</id>
         <label>Underlay listen interfaces</label>
-        <type>dropdown</type>
+        <type>select_multiple</type>
         <advanced>true</advanced>
         <help>Restrict which underlay interfaces STUN replies are captured on. Leave empty to listen on all eligible interfaces.</help>
     </field>

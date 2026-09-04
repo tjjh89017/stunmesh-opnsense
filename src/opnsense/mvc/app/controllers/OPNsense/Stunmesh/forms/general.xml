@@ -39,8 +39,10 @@
     <field>
         <id>stunmesh.general.stun_addresses</id>
         <label>STUN servers</label>
-        <type>text</type>
-        <help>Comma separated list of host:port STUN servers. Used in generated mode.</help>
+        <type>select_multiple</type>
+        <style>tokenize</style>
+        <allownew>true</allownew>
+        <help>List of host:port STUN servers. Used in generated mode.</help>
     </field>
     <field>
         <id>stunmesh.general.ping_interval</id>
