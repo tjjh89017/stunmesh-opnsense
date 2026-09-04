@@ -302,6 +302,13 @@ make_row(plugin_container, plugin_path[-1], plugin_fields, {
     'name': 'dht1',
     'type': 'builtin',
     'builtin': 'opendht',
+    # opendht needs at least one endpoint to actually start (checked
+    # below by running stunmesh-go -oneshot against the rendered
+    # config), even though the OPNsense model itself does not mark this
+    # field Required. Every other optional plugin field (cf_*, command,
+    # dedup, description) is deliberately left out to prove the Jinja
+    # template guards them.
+    'endpoints': 'https://dhtproxy2.jami.net:443,https://dhtproxy3.jami.net:443',
 }, plugin_uuid)
 
 # --- Stunmesh: one interface row referencing the WireGuard server ---
