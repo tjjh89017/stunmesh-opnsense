@@ -100,6 +100,7 @@ for ABI in "$@"; do
 		cp -a "$PLUGIN_SRC_DIR/${entry#./}" "$PLUGIN_DIR/"
 	done
 
+	mkdir -p "$PLUGIN_DIR/src/bin"
 	install -m 0755 "$BINARY" "$PLUGIN_DIR/src/bin/stunmesh-go"
 
 	echo ">>> make package (PKG override: pkg -o ABI=$ABI)"
