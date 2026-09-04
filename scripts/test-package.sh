@@ -372,8 +372,18 @@ echo "$RELOAD_OUTPUT"
 echo ">>> configctl template reload OPNsense/Stunmesh exit $RELOAD_STATUS"
 
 if [ "$RELOAD_STATUS" -ne 0 ] || printf '%s' "$RELOAD_OUTPUT" | grep -qi '^ERR'; then
-	echo ">>> template reload reported an error, dumping configd log for diagnosis"
-	tail -n 200 /var/log/configd.log 2>/dev/null || echo ">>> /var/log/configd.log not readable"
+	echo ">>> template reload reported an error"
+	echo ">>> retrying by calling template_ctl.py directly for a Python traceback"
+	if [ -f /usr/local/opnsense/service/template_ctl.py ]; then
+		python3 /usr/local/opnsense/service/template_ctl.py OPNsense/Stunmesh -c "$CONFIG_XML" || true
+	else
+		echo ">>> /usr/local/opnsense/service/template_ctl.py not found"
+	fi
+	echo ">>> tailing syslog for template/configd errors"
+	tail -n 200 /var/log/system/latest.log 2>/dev/null \
+		|| tail -n 200 /var/log/system.log 2>/dev/null \
+		|| clog /var/log/system/system.log 2>/dev/null | tail -n 200 \
+		|| echo ">>> no readable syslog found"
 	exit 1
 fi
 
