@@ -383,6 +383,11 @@ grep -qF "$CLIENT_PUBKEY" "$CONFIG_YAML" || { echo "error: config.yaml missing t
 grep -q 'plugin: "dht1"' "$CONFIG_YAML" || { echo "error: config.yaml missing the peer's plugin reference" >&2; exit 1; }
 grep -q 'type: "builtin"' "$CONFIG_YAML" || { echo "error: config.yaml missing the builtin plugin type" >&2; exit 1; }
 
+# Lists must render in YAML block style ("- item"), not flow style ("[a, b]").
+grep -q '    - "stun.l.google.com:19302"' "$CONFIG_YAML" || { echo "error: config.yaml stun addresses not in block style" >&2; exit 1; }
+grep -qF '      - "https://dhtproxy2.jami.net:443"' "$CONFIG_YAML" || { echo "error: config.yaml endpoints not in block style" >&2; exit 1; }
+grep -qE '(addresses|endpoints): \[' "$CONFIG_YAML" && { echo "error: config.yaml still has a flow style list" >&2; exit 1; }
+
 if python3 -c 'import yaml' >/dev/null 2>&1; then
 	python3 -c "import yaml; yaml.safe_load(open('$CONFIG_YAML'))"
 	echo ">>> config.yaml parses as valid YAML"

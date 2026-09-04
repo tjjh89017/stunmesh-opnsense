@@ -7,7 +7,10 @@ refresh_interval: "{{ OPNsense.stunmesh.general.refresh_interval|default('10m') 
 log:
   level: "{{ OPNsense.stunmesh.general.log_level|default('info') }}"
 stun:
-  addresses: [{% for addr in (OPNsense.stunmesh.general.stun_addresses|default('')).split(',') %}{% if addr|trim != '' %}"{{ addr|trim|replace('"', '\\"') }}"{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}]
+{% if (OPNsense.stunmesh.general.stun_addresses|default('')|trim) != '' %}  addresses:
+{% for addr in (OPNsense.stunmesh.general.stun_addresses|default('')).split(',') %}{% if addr|trim != '' %}    - "{{ addr|trim|replace('"', '\\"') }}"
+{% endif %}{% endfor %}{% else %}  addresses: []
+{% endif %}
 {% if OPNsense.stunmesh.general.ping_interval|default('') != '' or OPNsense.stunmesh.general.ping_timeout|default('') != '' or OPNsense.stunmesh.general.ping_retries|default('') != '' %}
 ping_monitor:
 {% if OPNsense.stunmesh.general.ping_interval|default('') != '' %}
@@ -29,7 +32,10 @@ plugins:
 {% if plug.type == 'builtin' %}
     name: "{{ plug.builtin|default('') }}"
 {% if plug.builtin == 'opendht' %}
-    endpoints: [{% for ep in (plug.endpoints|default('')).split(',') %}{% if ep|trim != '' %}"{{ ep|trim|replace('"', '\\"') }}"{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}]
+{% if (plug.endpoints|default('')|trim) != '' %}    endpoints:
+{% for ep in (plug.endpoints|default('')).split(',') %}{% if ep|trim != '' %}      - "{{ ep|trim|replace('"', '\\"') }}"
+{% endif %}{% endfor %}{% else %}    endpoints: []
+{% endif %}
 {% elif plug.builtin == 'cloudflare' %}
     zone: "{{ plug.cf_zone|default('')|replace('"', '\\"') }}"
     token: "{{ plug.cf_token|default('')|replace('"', '\\"') }}"
@@ -63,7 +69,9 @@ interfaces:
 {% endif %}
 {% endif %}
 {% if iface.listen_interfaces|default('') != '' %}
-    listen_interfaces: [{% for li in (iface.listen_interfaces|default('')).split(',') %}{% if li|trim != '' %}"{{ li|trim|replace('"', '\\"') }}"{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}]
+    listen_interfaces:
+{% for li in (iface.listen_interfaces|default('')).split(',') %}{% if li|trim != '' %}      - "{{ li|trim|replace('"', '\\"') }}"
+{% endif %}{% endfor %}
 {% endif %}
     listen_default_route: {{ 'true' if iface.listen_default_route == '1' else 'false' }}
     peers:
