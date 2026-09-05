@@ -1,7 +1,7 @@
 <model>
     <mount>//OPNsense/stunmesh</mount>
     <description>Stunmesh configuration</description>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <items>
         <general>
             <enabled type="BooleanField">
@@ -17,25 +17,7 @@
                 </OptionValues>
             </mode>
             <config type="TextField">
-                <Default><![CDATA[---
-refresh_interval: "1m"
-log:
-  level: "info"
-interfaces:
-  wg0:
-    peers:
-      "PEER_B":
-        public_key: "<PEER_B_PUBLIC_KEY_BASE64>"
-        plugin: dht
-stun:
-  addresses: ["stun.l.google.com:19302"]
-plugins:
-  dht:
-    type: builtin
-    name: opendht
-    endpoints: ["https://dhtproxy2.jami.net:443", "https://dhtproxy3.jami.net:443"]
-]]></Default>
-                <Required>Y</Required>
+                <Required>N</Required>
             </config>
             <refresh_interval type="TextField">
                 <Default>10m</Default>
