@@ -70,7 +70,7 @@ interfaces:
 {% endif %}
 {% if iface.listen_interfaces|default('') != '' %}
     listen_interfaces:
-{% for li in (iface.listen_interfaces|default('')).split(',') %}{% if li|trim != '' %}      - "{{ li|trim|replace('"', '\\"') }}"
+{% for li in (iface.listen_interfaces|default('')).split(',') %}{% set phys = helpers.physical_interface(li|trim) %}{% if phys != '' %}      - "{{ phys|replace('"', '\\"') }}"
 {% endif %}{% endfor %}
 {% endif %}
     listen_default_route: {{ 'true' if iface.listen_default_route == '1' else 'false' }}

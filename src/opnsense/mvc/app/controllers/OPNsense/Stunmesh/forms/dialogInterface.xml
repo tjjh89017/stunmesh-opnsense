@@ -59,7 +59,7 @@
         <label>Underlay listen interfaces</label>
         <type>select_multiple</type>
         <advanced>true</advanced>
-        <help>Restrict which underlay interfaces STUN replies are captured on. Leave empty to listen on all eligible interfaces.</help>
+        <help>Restrict which underlay interfaces STUN replies are captured on. Leave empty to listen on all eligible interfaces. Selected interfaces are mapped to their device names (e.g. igb0) in the generated config.</help>
     </field>
     <field>
         <id>interface.listen_default_route</id>
