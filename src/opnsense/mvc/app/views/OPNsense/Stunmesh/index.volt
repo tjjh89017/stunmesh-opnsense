@@ -87,28 +87,25 @@
         toggleRow('peer.ping_timeout', enabled);
     }
 
-    // Saves the General tab, then re-renders the config preview from the
-    // saved model via configd (no write to /usr/local/etc/stunmesh/config.yaml).
+    // Re-renders the config preview from the last saved model via configd
+    // (no write to /usr/local/etc/stunmesh/config.yaml, no implicit save).
     function refreshPreview() {
-        var dfObj = $.Deferred();
-        saveFormToEndpoint("/api/stunmesh/settings/set", 'frm_GeneralSettings', dfObj.resolve, true, dfObj.reject);
-        dfObj.done(function() {
-            ajaxCall(url = "/api/stunmesh/service/preview", sendData = {}, callback = function(data, status) {
-                if (status != "success" || data['status'] != 'ok') {
-                    $("#stunmesh-preview").text("{{ lang._('Unable to render the configuration preview.') }}");
-                } else {
-                    $("#stunmesh-preview").text(data['config']);
-                }
-            });
+        ajaxCall(url = "/api/stunmesh/service/preview", sendData = {}, callback = function(data, status) {
+            if (status != "success" || data['status'] != 'ok') {
+                $("#stunmesh-preview").text("{{ lang._('Unable to render the configuration preview.') }}");
+            } else {
+                $("#stunmesh-preview").text(data['config']);
+            }
         });
     }
 
     $(document).ready(function() {
+        toggleRow('stunmesh.general.config', false);
         mapDataToFormUI({'frm_GeneralSettings': "/api/stunmesh/settings/get"}).done(function() {
+            toggleGeneralMode();
             formatTokenizersUI();
             $('.selectpicker').selectpicker('refresh');
             updateServiceControlUI('stunmesh');
-            toggleGeneralMode();
             refreshPreview();
         });
 
@@ -192,7 +189,7 @@
             <button class="btn btn-default" id="refreshPreviewAct" type="button">{{ lang._('Refresh preview') }}</button>
             <button class="btn btn-default" id="copyConfigAct" type="button">{{ lang._('Copy to editor') }}</button>
             <pre id="stunmesh-preview"></pre>
-            <p><small class="text-muted">{{ lang._('Preview is rendered from saved settings. Apply writes it to /usr/local/etc/stunmesh/config.yaml and restarts the service.') }}</small></p>
+            <p><small class="text-muted">{{ lang._('Preview is rendered from saved settings; unsaved changes on this form are not reflected until you save or apply. Apply writes it to /usr/local/etc/stunmesh/config.yaml and restarts the service.') }}</small></p>
         </div>
     </div>
     <div id="plugins" class="tab-pane fade in">

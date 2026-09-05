@@ -29,7 +29,7 @@
             to editor" to start from the generated file, then add options the web
             UI does not expose (proxy, listen_interfaces, ping_monitor,
             exec/shell plugin args, ...). See https://docs.stunmesh.dev for every
-            key.</help>
+            key. This field is empty in Generate mode.</help>
     </field>
     <field>
         <type>header</type>

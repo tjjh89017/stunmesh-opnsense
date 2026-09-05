@@ -31,7 +31,19 @@
 namespace OPNsense\Stunmesh;
 
 use OPNsense\Base\BaseModel;
+use OPNsense\Base\Messages\Message;
 
 class Stunmesh extends BaseModel
 {
+    public function performValidation($validateFullModel = false)
+    {
+        $messages = parent::performValidation($validateFullModel);
+        if ((string)$this->general->mode == 'custom' && trim((string)$this->general->config) == '') {
+            $messages->appendMessage(new Message(
+                gettext('Custom YAML configuration is required in Custom YAML mode.'),
+                'general.config'
+            ));
+        }
+        return $messages;
+    }
 }
