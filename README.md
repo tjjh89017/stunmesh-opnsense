@@ -130,6 +130,8 @@ all four the `build` job produces.
 
 ## Updating to a new stunmesh-go release
 
+This repo is independent of the other downstream repos and can be updated as soon as a stunmesh-go release is published.
+
 1. Bump `PLUGIN_VERSION` in `Makefile` and reset `PLUGIN_REVISION` to `1`.
 2. Refresh `distinfo`:
    ```sh
