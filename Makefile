@@ -2,7 +2,7 @@
 # (mode 0755) before `make package` runs.
 
 PLUGIN_NAME=		stunmesh
-PLUGIN_VERSION=		1.15.2
+PLUGIN_VERSION=		1.15.3
 PLUGIN_REVISION=	1
 PLUGIN_COMMENT=		WireGuard NAT traversal with STUN (stunmesh-go)
 PLUGIN_MAINTAINER=	tjjh89017@hotmail.com
